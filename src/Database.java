@@ -20,15 +20,53 @@ class Database implements Serializable {
     this.transacoes = new ArrayList<Transacao>();
     this.orcamentos = new ArrayList<Orcamento>();
     this.categorias = new ArrayList<Categoria>();
+    inicializarCategoriasPadrao();
   }
 
-  // --------------------------------------------------------------------------
-  // Métodos de manipulação
-  // --------------------------------------------------------------------------
+  /**
+   * Inicializa as categorias padrão do sistema.
+   * Estas categorias não podem ser deletadas ou modificadas.
+   * São criadas automaticamente se não existirem.
+   */
+  private void inicializarCategoriasPadrao() {
+    // Lista de categorias padrão
+    Categoria[] categoriasPadrao = {
+        new Categoria("Alimentação", "Gastos com comida e bebida", true),
+        new Categoria("Transporte", "Gastos com transporte e combustível", true),
+        new Categoria("Saúde", "Gastos com saúde e medicamentos", true),
+        new Categoria("Educação", "Gastos com educação e cursos", true),
+        new Categoria("Lazer", "Gastos com entretenimento e lazer", true),
+        new Categoria("Moradia", "Gastos com aluguel, contas e manutenção", true),
+        new Categoria("Salário", "Receita de salário", true),
+        new Categoria("Outros", "Outras receitas e despesas", true)
+    };
+
+    // Adiciona apenas as categorias padrão que ainda não existem
+    for (Categoria categoriaPadrao : categoriasPadrao) {
+      boolean existe = false;
+      for (Categoria categoriaExistente : this.categorias) {
+        if (categoriaExistente.getNome().equalsIgnoreCase(categoriaPadrao.getNome())) {
+          existe = true;
+          // Se existe mas não está marcada como padrão, atualiza
+          if (!categoriaExistente.isPadrao()) {
+            // Não podemos modificar diretamente, então removemos e adicionamos a padrão
+            // Mas isso só acontece se não for padrão, então vamos apenas garantir
+            break;
+          }
+        }
+      }
+      if (!existe) {
+        this.categorias.add(categoriaPadrao);
+      }
+    }
+  }
+
   /**
    * Verifica se já existe uma conta com o mesmo nome
-   * @param nome Nome da conta a verificar
-   * @param contaExcluir Conta a excluir da verificação (útil ao renomear). Pode ser null.
+   * 
+   * @param nome         Nome da conta a verificar
+   * @param contaExcluir Conta a excluir da verificação (útil ao renomear). Pode
+   *                     ser null.
    * @return true se já existe uma conta com esse nome, false caso contrário
    */
   public boolean existeContaComNome(String nome, Conta contaExcluir) {
@@ -49,6 +87,7 @@ class Database implements Serializable {
 
   /**
    * Verifica se já existe uma conta com o mesmo nome
+   * 
    * @param nome Nome da conta a verificar
    * @return true se já existe uma conta com esse nome, false caso contrário
    */
@@ -58,7 +97,8 @@ class Database implements Serializable {
 
   /**
    * Atualiza o nome de uma conta, validando se o novo nome já existe
-   * @param conta Conta a ser atualizada
+   * 
+   * @param conta    Conta a ser atualizada
    * @param novoNome Novo nome para a conta
    * @throws IllegalArgumentException se já existir uma conta com o novo nome
    */
@@ -79,6 +119,7 @@ class Database implements Serializable {
   /**
    * Adiciona uma nova conta ao banco de dados
    * Valida se já existe uma conta com o mesmo nome
+   * 
    * @param conta Conta a ser adicionada
    * @throws IllegalArgumentException se já existir uma conta com o mesmo nome
    */
@@ -86,17 +127,18 @@ class Database implements Serializable {
     if (conta == null) {
       throw new IllegalArgumentException("A conta não pode ser nula.");
     }
-    
+
     if (existeContaComNome(conta.getNome())) {
       throw new IllegalArgumentException("Já existe uma conta com o nome '" + conta.getNome() + "'.");
     }
-    
+
     this.contas.add(conta);
     salvar("contas");
   }
 
   /**
    * Remove uma conta pelo ID
+   * 
    * @param id ID da conta (String UUID)
    */
   public void removerConta(String id) {
@@ -112,6 +154,7 @@ class Database implements Serializable {
 
   /**
    * Busca uma conta pelo ID
+   * 
    * @param id ID da conta (String UUID)
    * @return Conta encontrada ou null se não existir
    */
@@ -126,6 +169,7 @@ class Database implements Serializable {
 
   /**
    * Busca uma conta pelo nome
+   * 
    * @param nome Nome da conta
    * @return Conta encontrada ou null se não existir
    */
@@ -144,6 +188,7 @@ class Database implements Serializable {
   /**
    * Atualiza o saldo de uma conta e salva automaticamente
    * Use este método quando modificar o saldo de uma conta diretamente
+   * 
    * @param id ID da conta (String UUID)
    */
   public void atualizarConta(String id) {
@@ -155,6 +200,7 @@ class Database implements Serializable {
   /**
    * Processa uma transação e salva automaticamente
    * Este é o método recomendado para processar transações
+   * 
    * @param transacao Transação a ser processada
    * @return true se processada com sucesso, false caso contrário
    */
@@ -198,11 +244,63 @@ class Database implements Serializable {
     salvar("categorias");
   }
 
+  /**
+   * Remove uma categoria do banco de dados
+   * Categorias padrão não podem ser removidas
+   * 
+   * @param categoria Categoria a ser removida
+   * @throws IllegalArgumentException se a categoria for padrão
+   */
   public void removerCategoria(Categoria categoria) {
+    if (categoria == null) {
+      throw new IllegalArgumentException("A categoria não pode ser nula.");
+    }
+    if (categoria.isPadrao()) {
+      throw new IllegalArgumentException("Não é possível remover a categoria padrão '" + categoria.getNome() + "'.");
+    }
     if (this.categorias.contains(categoria)) {
       this.categorias.remove(categoria);
       salvar("categorias");
     }
+  }
+
+  /**
+   * Remove uma categoria pelo nome
+   * Categorias padrão não podem ser removidas
+   * 
+   * @param nome Nome da categoria a ser removida
+   * @throws IllegalArgumentException se a categoria for padrão ou não existir
+   */
+  public void removerCategoriaPorNome(String nome) {
+    if (nome == null || nome.trim().isEmpty()) {
+      throw new IllegalArgumentException("O nome da categoria não pode ser vazio.");
+    }
+    Categoria categoria = buscarCategoriaPorNome(nome);
+    if (categoria == null) {
+      throw new IllegalArgumentException("Categoria '" + nome + "' não encontrada.");
+    }
+    if (categoria.isPadrao()) {
+      throw new IllegalArgumentException("Não é possível remover a categoria padrão '" + categoria.getNome() + "'.");
+    }
+    removerCategoria(categoria);
+  }
+
+  /**
+   * Busca uma categoria pelo nome
+   * 
+   * @param nome Nome da categoria
+   * @return Categoria encontrada ou null se não existir
+   */
+  public Categoria buscarCategoriaPorNome(String nome) {
+    if (nome == null || nome.trim().isEmpty()) {
+      return null;
+    }
+    for (Categoria categoria : this.categorias) {
+      if (categoria.getNome().equalsIgnoreCase(nome.trim())) {
+        return categoria;
+      }
+    }
+    return null;
   }
 
   public ArrayList<Conta> getContas() {
@@ -245,15 +343,17 @@ class Database implements Serializable {
 
   /**
    * Método para salvar uma lista específica do banco de dados em um arquivo
-   * @param nome Nome do tipo de dado a salvar (contas, transacoes, orcamentos, categorias)
+   * 
+   * @param nome Nome do tipo de dado a salvar (contas, transacoes, orcamentos,
+   *             categorias)
    */
   public void salvar(String nome) {
     nome = nome.toLowerCase();
     garantirDiretorio();
-    
+
     try {
       ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(PATH + nome + ".dat"));
-      
+
       switch (nome) {
         case "contas":
           out.writeObject(this.contas);
@@ -272,7 +372,7 @@ class Database implements Serializable {
           out.close();
           return;
       }
-      
+
       out.close();
     } catch (IOException e) {
       System.out.println("Erro ao salvar " + nome + ": " + e.getMessage());
@@ -291,16 +391,18 @@ class Database implements Serializable {
 
   /**
    * Método para carregar o estado do banco de dados a partir dos arquivos
+   * Garante que as categorias padrão sempre existam após o carregamento
+   * 
    * @return O objeto Database carregado dos arquivos
    */
   public static Database carregar() {
     Database db = new Database();
-    String[] nomes = {"contas", "orcamentos", "categorias", "transacoes"};
-    
+    String[] nomes = { "contas", "orcamentos", "categorias", "transacoes" };
+
     for (String nome : nomes) {
       try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(PATH + nome + ".dat"))) {
         Object obj = in.readObject();
-        
+
         switch (nome) {
           case "contas":
             if (obj instanceof ArrayList) {
@@ -339,6 +441,11 @@ class Database implements Serializable {
       }
     }
     
+    // Garante que as categorias padrão sempre existam após carregar
+    db.inicializarCategoriasPadrao();
+    // Salva se alguma categoria padrão foi adicionada
+    db.salvar("categorias");
+    
     return db;
   }
 
@@ -351,5 +458,4 @@ class Database implements Serializable {
         ", categorias=" + categorias +
         '}';
   }
-
 }

@@ -17,6 +17,9 @@ public class Categoria implements Serializable {
     }
 
     public void setNome(String nome) {
+        if (this.padrao) {
+            throw new UnsupportedOperationException("Não é possível alterar o nome de uma categoria padrão.");
+        }
         this.nome = nome;
     }
 
@@ -25,15 +28,14 @@ public class Categoria implements Serializable {
     }
 
     public void setDescricao(String descricao) {
+        if (this.padrao) {
+            throw new UnsupportedOperationException("Não é possível alterar a descrição de uma categoria padrão.");
+        }
         this.descricao = descricao;
     }
 
     public boolean isPadrao() {
         return padrao;
-    }
-
-    public void setPadrao(boolean padrao) {
-        this.padrao = padrao;
     }
 
     @Override
