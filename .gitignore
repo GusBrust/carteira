@@ -15,6 +15,29 @@ dist/
 *.ipr
 out/
 
+# IDE - Eclipse
+.classpath
+.project
+.settings/
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.recommenders
+
+# IDE - NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
 # IDE - VS Code
 .vscode/
 *.code-workspace
@@ -55,5 +78,3 @@ Dados/*.dat
 *.bak
 *.backup
 *~
-
-
