@@ -43,7 +43,7 @@ public class Transferencia extends Transacao {
         return contaDestino;
     }
 
-    public void setContaDestino(Conta contaDestino) {
+    public void alterarContaDestino(Conta contaDestino) {
         if (contaDestino == null || contaDestino.equals(conta)) {
             throw new IllegalArgumentException("A conta de destino não pode ser nula ou igual à conta de origem.");
         }
@@ -51,7 +51,7 @@ public class Transferencia extends Transacao {
     }
 
     @Override
-    public void setCategoria(Categoria categoria) {
+    public void alterarCategoria(Categoria categoria) {
         // Transferências não possuem categoria
         // Ignora silenciosamente tentativas de definir categoria
     }

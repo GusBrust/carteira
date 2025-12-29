@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.io.FileInputStream;
 
@@ -200,6 +201,7 @@ class Database implements Serializable {
   /**
    * Processa uma transação e salva automaticamente
    * Este é o método recomendado para processar transações
+   * Atualiza automaticamente os orçamentos relacionados
    * 
    * @param transacao Transação a ser processada
    * @return true se processada com sucesso, false caso contrário
@@ -210,6 +212,8 @@ class Database implements Serializable {
       salvar("transacoes");
       // Também salva contas pois o saldo pode ter mudado
       salvar("contas");
+      // Atualiza orçamentos relacionados (apenas para despesas)
+      atualizarOrcamentoPorTransacao(transacao);
       return true;
     }
     return false;
@@ -224,12 +228,135 @@ class Database implements Serializable {
     salvar("contas");
   }
 
-  public void adicionarOrcamento(Orcamento orcamento) {
-    if (this.orcamentos.contains(orcamento)) {
+  public void removerTransacao(Transacao transacao) {
+    if (this.transacoes.contains(transacao)) {
+      this.transacoes.remove(transacao);
+      salvar("transacoes");
+      salvar("contas");
+    }
+  }
+
+
+  /**
+   * Cria um orçamento na base de dados se ele ainda não existir, 
+   * e salva automaticamente.
+   * @param orcamento Orcamento a ser criado.
+   */
+  public void criarOuAtualizarOrcamento(Orcamento orcamento) {
+    if (orcamento == null) {
+      throw new IllegalArgumentException("O orçamento não pode ser nulo.");
+    }
+    if (!this.orcamentos.contains(orcamento)) {
+      this.orcamentos.add(orcamento);
+      salvar("orcamentos");
+    }
+  }
+
+  /**
+   * Reseta os orçamentos que estão em meses anteriores.
+   * Atualiza o período para o mês atual e zera o valor gasto.
+   * Deve ser chamado periodicamente (ex: ao carregar a Database).
+   */
+  public void resetarOrcamentosMensais() {
+    LocalDateTime agora = LocalDateTime.now();
+    int mesAtual = agora.getMonthValue();
+    int anoAtual = agora.getYear();
+    boolean houveAlteracao = false;
+
+    for (Orcamento orcamento : this.orcamentos) {
+      int mesOrcamento = orcamento.getDataInicio().getMonthValue();
+      int anoOrcamento = orcamento.getDataInicio().getYear();
+
+      // Se o orçamento é de um mês/ano anterior, reseta
+      if (anoOrcamento < anoAtual || 
+          (anoOrcamento == anoAtual && mesOrcamento < mesAtual)) {
+        // Reseta o valor gasto
+        orcamento.alterarValorGasto(0);
+        
+        // Atualiza o período para o mês atual
+        LocalDateTime novoInicio = agora.withDayOfMonth(1)
+            .withHour(0).withMinute(0).withSecond(0).withNano(0);
+        int ultimoDia = agora.toLocalDate().lengthOfMonth();
+        LocalDateTime novoFim = agora.withDayOfMonth(ultimoDia)
+            .withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        
+        // Atualiza as datas (precisa de método setter no Orcamento)
+        orcamento.alterarPeriodo(novoInicio, novoFim);
+        houveAlteracao = true;
+      }
+    }
+
+    if (houveAlteracao) {
+      salvar("orcamentos");
+    }
+  }
+
+  /**
+   * Recalcula o valor gasto de todos os orçamentos baseado nas transações existentes.
+   * Útil ao carregar a Database para garantir que os valores estão corretos.
+   */
+  public void recalcularValorGastoOrcamentos() {
+    for (Orcamento orcamento : this.orcamentos) {
+      double valorGastoTotal = 0;
+      
+      // Soma todas as despesas da categoria dentro do período do orçamento
+      for (Transacao transacao : this.transacoes) {
+        if (transacao instanceof Despesa && 
+            transacao.getCategoria() != null &&
+            transacao.getCategoria().equals(orcamento.getCategoria())) {
+          
+          LocalDateTime dataTransacao = transacao.getData();
+          boolean dentroDoPeriodo = (dataTransacao.isAfter(orcamento.getDataInicio()) || 
+                                     dataTransacao.isEqual(orcamento.getDataInicio())) &&
+                                    (dataTransacao.isBefore(orcamento.getDataFim()) || 
+                                     dataTransacao.isEqual(orcamento.getDataFim()));
+          
+          if (dentroDoPeriodo) {
+            valorGastoTotal += transacao.getValor();
+          }
+        }
+      }
+      
+      orcamento.alterarValorGasto(valorGastoTotal);
+    }
+    
+    salvar("orcamentos");
+  }
+
+  /**
+   * Atualiza o orçamento relacionado à categoria de uma transação, se existir.
+   * Apenas DESPESAS são contabilizadas no orçamento.
+   * Verifica se a transação está dentro do período do orçamento.
+   * 
+   * @param transacao A transação que foi processada
+   */
+  public void atualizarOrcamentoPorTransacao(Transacao transacao) {
+    if (transacao == null || transacao.getCategoria() == null) {
       return;
     }
-    this.orcamentos.add(orcamento);
-    salvar("orcamentos");
+    
+    // Apenas despesas afetam o orçamento (receitas não)
+    if (!(transacao instanceof Despesa)) {
+      return;
+    }
+    
+    LocalDateTime dataTransacao = transacao.getData();
+    
+    for (Orcamento orcamento : this.orcamentos) {
+      if (orcamento.getCategoria().equals(transacao.getCategoria())) {
+        // Verifica se a transação está dentro do período do orçamento
+        boolean dentroDoPeriodo = (dataTransacao.isAfter(orcamento.getDataInicio()) || 
+                                   dataTransacao.isEqual(orcamento.getDataInicio())) &&
+                                  (dataTransacao.isBefore(orcamento.getDataFim()) || 
+                                   dataTransacao.isEqual(orcamento.getDataFim()));
+        
+        if (dentroDoPeriodo) {
+          orcamento.alterarValorGasto(orcamento.getValorGasto() + transacao.getValor());
+          salvar("orcamentos");
+        }
+        break;
+      }
+    }
   }
 
   public boolean existeCategoria(Categoria categoria) {
@@ -445,6 +572,12 @@ class Database implements Serializable {
     db.inicializarCategoriasPadrao();
     // Salva se alguma categoria padrão foi adicionada
     db.salvar("categorias");
+    
+    // Reseta orçamentos mensais se necessário
+    db.resetarOrcamentosMensais();
+    
+    // Recalcula valores gastos baseado nas transações existentes
+    db.recalcularValorGastoOrcamentos();
     
     return db;
   }

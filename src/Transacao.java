@@ -43,7 +43,7 @@ public abstract class Transacao implements Serializable {
         return valor;
     }
 
-    public void setValor(double valor) {
+    public void alterarValor(double valor) {
         if (valor <= 0) {
             throw new IllegalArgumentException("O valor da transação deve ser maior que zero.");
         }
@@ -54,7 +54,7 @@ public abstract class Transacao implements Serializable {
         return descricao;
     }
 
-    public void setDescricao(String descricao) {
+    public void alterarDescricao(String descricao) {
         this.descricao = descricao;
     }
 
@@ -62,7 +62,7 @@ public abstract class Transacao implements Serializable {
         return data;
     }
 
-    public void setData(LocalDateTime data) {
+    public void alterarData(LocalDateTime data) {
         this.data = data;
     }
 
@@ -70,7 +70,7 @@ public abstract class Transacao implements Serializable {
         return categoria;
     }
 
-    public void setCategoria(Categoria categoria) {
+    public void alterarCategoria(Categoria categoria) {
         this.categoria = categoria;
     }
 
@@ -78,7 +78,7 @@ public abstract class Transacao implements Serializable {
         return conta;
     }
 
-    public void setConta(Conta conta) {
+    public void alterarConta(Conta conta) {
         if (conta == null) {
             throw new IllegalArgumentException("A conta não pode ser nula.");
         }
