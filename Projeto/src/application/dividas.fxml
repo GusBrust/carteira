@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="665.0" prefWidth="881.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.dividasController">
+   <bottom>
+      <HBox alignment="CENTER" prefHeight="82.0" prefWidth="882.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="130.0">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" />
+               </HBox.margin>
+               <children>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openDashboard" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../../Documents/UBI/POO/Dashboard.png" />
+                     </image></ImageView>
+                  <Label alignment="CENTER" onMouseClicked="#openDashboard" prefHeight="34.0" prefWidth="130.0" text="Dashboard">
+                     <font>
+                        <Font name="Segoe UI Bold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            <VBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="130.0">
+               <children>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openTransacoes" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../../Documents/UBI/POO/transacoes.png" />
+                     </image></ImageView>
+                  <Label alignment="CENTER" onMouseClicked="#openTransacoes" prefHeight="43.0" prefWidth="130.0" text="Transações">
+                     <font>
+                        <Font name="Segoe UI Bold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <HBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" />
+               </HBox.margin>
+            </VBox>
+            <VBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="130.0">
+               <children>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openAdicionar" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../../Documents/UBI/POO/adicionar.png" />
+                     </image></ImageView>
+                  <Label alignment="CENTER" onMouseClicked="#openAdicionar" prefHeight="43.0" prefWidth="130.0" text="Adicionar">
+                     <font>
+                        <Font name="Segoe UI Bold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <HBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" />
+               </HBox.margin>
+            </VBox>
+            <VBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="130.0">
+               <children>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openDividas" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../../Documents/UBI/POO/dividas.png" />
+                     </image></ImageView>
+                  <Label alignment="CENTER" onMouseClicked="#openDividas" prefHeight="43.0" prefWidth="130.0" text="Dívidas">
+                     <font>
+                        <Font name="Segoe UI Bold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <HBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" />
+               </HBox.margin>
+            </VBox>
+         </children>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+      </HBox>
+   </bottom>
+   <top>
+      <Label text="Dívidas e Empréstimos" BorderPane.alignment="CENTER">
+         <font>
+            <Font name="Segoe UI Bold" size="24.0" />
+         </font>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </Label>
+   </top>
+   <center>
+      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox prefHeight="60.0" prefWidth="200.0">
+               <children>
+                  <Label alignment="CENTER_RIGHT" prefWidth="120.0" text="Entidade:">
+                     <font>
+                        <Font name="Segoe UI" size="18.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField fx:id="txtEntidade" prefWidth="160.0" />
+               </children>
+            </HBox>
+            <HBox prefHeight="60.0" prefWidth="200.0">
+               <children>
+                  <Label alignment="CENTER_RIGHT" prefWidth="120.0" text="Tipo:">
+                     <font>
+                        <Font name="Segoe UI" size="18.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <ChoiceBox fx:id="cbTipoDivida" prefWidth="160.0" />
+               </children>
+            </HBox>
+            <HBox prefHeight="60.0" prefWidth="200.0">
+               <children>
+                  <Label alignment="CENTER_RIGHT" prefWidth="120.0" text="Valor Total:">
+                     <font>
+                        <Font name="Segoe UI" size="18.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField fx:id="txtValorTotal" prefWidth="160.0" />
+               </children>
+            </HBox>
+            <HBox prefHeight="60.0" prefWidth="200.0">
+               <children>
+                  <Label alignment="CENTER_RIGHT" prefWidth="120.0" text="Valor Pago:">
+                     <font>
+                        <Font name="Segoe UI" size="18.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField fx:id="txtValorPago" prefWidth="160.0" />
+               </children>
+            </HBox>
+            <HBox alignment="TOP_CENTER" prefHeight="60.0" prefWidth="200.0">
+               <children>
+                  <Button fx:id="btnAdicionarDivida" mnemonicParsing="false" style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #333333;" text="Adicionar Dívida">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                     <font>
+                        <Font name="Segoe UI" size="18.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
+            <TableView fx:id="tblDividas" prefHeight="200.0" prefWidth="200.0">
+              <columns>
+                <TableColumn fx:id="colEntidade" prefWidth="75.0" text="Entidade" />
+                <TableColumn fx:id="colTipo" prefWidth="75.0" text="Tipo" />
+                  <TableColumn fx:id="colTotal" prefWidth="75.0" text="Total" />
+                  <TableColumn fx:id="colPago" prefWidth="75.0" text="Pago" />
+                  <TableColumn fx:id="colEmFalta" prefWidth="75.0" text="Em Falta" />
+              </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
+            </TableView>
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </VBox>
+   </center>
+</BorderPane>

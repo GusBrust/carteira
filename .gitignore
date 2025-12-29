@@ -44,7 +44,7 @@ desktop.ini
 
 # Application specific - Data files
 # Descomente a linha abaixo se não quiser versionar os arquivos de dados
-# Dados/*.dat
+Dados/*.dat
 
 # Temporary files
 *.tmp
@@ -55,4 +55,5 @@ desktop.ini
 *.bak
 *.backup
 *~
+
 
