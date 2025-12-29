@@ -1,4 +1,4 @@
-package application;
+package gui.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Label;
@@ -29,6 +29,11 @@ public class InterfaceController {
 
     @FXML
     void openTransacoes(MouseEvent event) {
+
+    }
+
+    @FXML
+    void openOrcamentos(MouseEvent event) {
 
     }
 

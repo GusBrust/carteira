@@ -1,9 +1,11 @@
-package application;
+package gui.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
+
+
 
 public class transacoesController {
 
@@ -51,6 +53,11 @@ public class transacoesController {
 
     @FXML
     void openTransacoes(MouseEvent event) {
+
+    }
+
+    @FXML
+    void openOrcamentos(MouseEvent event) {
 
     }
 

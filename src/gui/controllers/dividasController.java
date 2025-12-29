@@ -1,4 +1,4 @@
-package application;
+package gui.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -59,6 +59,11 @@ public class dividasController {
 
     @FXML
     void openTransacoes(MouseEvent event) {
+
+    }
+
+    @FXML
+    void openOrcamentos(MouseEvent event) {
 
     }
 

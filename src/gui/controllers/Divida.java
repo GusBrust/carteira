@@ -1,4 +1,4 @@
-package application;
+package gui.controllers;
 
 public class Divida {
 

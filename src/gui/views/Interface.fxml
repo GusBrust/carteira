@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="665.0" prefWidth="881.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.InterfaceController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="665.0" prefWidth="881.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controllers.InterfaceController">
    <bottom>
       <HBox alignment="CENTER" prefHeight="82.0" prefWidth="882.0" BorderPane.alignment="CENTER">
          <children>
@@ -21,7 +21,7 @@
                <children>
                   <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openDashboard" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../../../../Documents/UBI/POO/Dashboard.png" />
+                        <Image url="@resources/dashboard.png" />
                      </image></ImageView>
                   <Label alignment="CENTER" onMouseClicked="#openDashboard" prefHeight="34.0" prefWidth="130.0" text="Dashboard">
                      <font>
@@ -34,7 +34,7 @@
                <children>
                   <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openTransacoes" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../../../../Documents/UBI/POO/transacoes.png" />
+                        <Image url="@resources/transacoes.png" />
                      </image></ImageView>
                   <Label alignment="CENTER" onMouseClicked="#openTransacoes" prefHeight="43.0" prefWidth="130.0" text="Transações">
                      <font>
@@ -50,7 +50,7 @@
                <children>
                   <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openAdicionar" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../../../../Documents/UBI/POO/adicionar.png" />
+                        <Image url="@resources/adicionar.png" />
                      </image></ImageView>
                   <Label alignment="CENTER" onMouseClicked="#openAdicionar" prefHeight="43.0" prefWidth="130.0" text="Adicionar">
                      <font>
@@ -64,9 +64,25 @@
             </VBox>
             <VBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="130.0">
                <children>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openOrcamentos" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@resources/orcamentos.png" />
+                     </image></ImageView>
+                  <Label alignment="CENTER" onMouseClicked="#openOrcamentos" prefHeight="43.0" prefWidth="130.0" text="Orçamentos">
+                     <font>
+                        <Font name="Segoe UI Bold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <HBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" />
+               </HBox.margin>
+            </VBox>
+            <VBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="130.0">
+               <children>
                   <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openDividas" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../../../../Documents/UBI/POO/dividas.png" />
+                        <Image url="@resources/dividas.png" />
                      </image></ImageView>
                   <Label alignment="CENTER" onMouseClicked="#openDividas" prefHeight="43.0" prefWidth="130.0" text="Dívidas">
                      <font>
