@@ -1,3 +1,5 @@
+package model;
+
 import java.io.Serializable;
 
 public class Categoria implements Serializable {
@@ -46,6 +48,7 @@ public class Categoria implements Serializable {
                 ", padrao=" + padrao +
                 '}';
     }
+
 
     @Override
     public boolean equals(Object obj) {

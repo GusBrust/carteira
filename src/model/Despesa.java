@@ -1,13 +1,40 @@
+package model;
+
 import java.time.LocalDateTime;
 
 public class Despesa extends Transacao {
+    private String dividaId; // ID da dívida relacionada, se houver
 
     public Despesa(double valor, String descricao, LocalDateTime data, Categoria categoria, Conta conta) {
         super(valor, descricao, data, categoria, conta);
+        this.dividaId = null;
     }
 
     public Despesa(double valor, String descricao, Categoria categoria, Conta conta) {
         super(valor, descricao, LocalDateTime.now(), categoria, conta);
+        this.dividaId = null;
+    }
+    
+    public Despesa(double valor, String descricao, LocalDateTime data, Categoria categoria, Conta conta, String dividaId) {
+        super(valor, descricao, data, categoria, conta);
+        this.dividaId = dividaId;
+    }
+    
+    public Despesa(double valor, String descricao, Categoria categoria, Conta conta, String dividaId) {
+        super(valor, descricao, LocalDateTime.now(), categoria, conta);
+        this.dividaId = dividaId;
+    }
+    
+    public String getDividaId() {
+        return dividaId;
+    }
+    
+    public void setDividaId(String dividaId) {
+        this.dividaId = dividaId;
+    }
+    
+    public boolean estaRelacionadaADivida() {
+        return dividaId != null && !dividaId.isEmpty();
     }
 
     @Override

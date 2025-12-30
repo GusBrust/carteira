@@ -45,7 +45,7 @@
                   <TableColumn fx:id="colValorGasto" prefWidth="120.0" text="Valor Gasto" />
                   <TableColumn fx:id="colProgresso" prefWidth="200.0" text="Progresso" />
                   <TableColumn fx:id="colPeriodo" prefWidth="200.0" text="Período" />
-                  <TableColumn fx:id="colAcoes" prefWidth="100.0" text="Ações" />
+                  <TableColumn fx:id="colAcoes" prefWidth="150.0" text="Ações" />
                </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

@@ -1,6 +1,9 @@
+package model;
+
 import java.time.LocalDateTime;
 
 public class Transferencia extends Transacao {
+    private static final long serialVersionUID = 1L;
     private Conta contaDestino;
 
     public Transferencia(double valor, String descricao, LocalDateTime data, 

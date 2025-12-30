@@ -132,7 +132,7 @@
             </HBox>
             <HBox prefHeight="60.0" prefWidth="200.0">
                <children>
-                  <Label alignment="CENTER_RIGHT" prefWidth="120.0" text="Tipo:">
+                  <Label alignment="CENTER_RIGHT" prefWidth="120.0" text="Descrição:">
                      <font>
                         <Font name="Segoe UI" size="18.0" />
                      </font>
@@ -140,7 +140,7 @@
                         <Insets right="10.0" />
                      </HBox.margin>
                   </Label>
-                  <ChoiceBox fx:id="cbTipoDivida" prefWidth="160.0" />
+                  <TextField fx:id="txtDescricaoDivida" prefWidth="160.0" />
                </children>
             </HBox>
             <HBox prefHeight="60.0" prefWidth="200.0">
@@ -169,12 +169,14 @@
                   <TextField fx:id="txtValorPago" prefWidth="160.0" />
                </children>
             </HBox>
-            <HBox alignment="TOP_CENTER" prefHeight="60.0" prefWidth="200.0">
+            <HBox alignment="TOP_CENTER" prefHeight="60.0" prefWidth="200.0" spacing="10.0">
                <children>
-                  <Button fx:id="btnAdicionarDivida" mnemonicParsing="false" style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #333333;" text="Adicionar Dívida">
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
+                  <Button fx:id="btnAdicionarDivida" mnemonicParsing="false" onAction="#adicionarDivida" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 10; -fx-border-radius: 10;" text="Adicionar Dívida">
+                     <font>
+                        <Font name="Segoe UI" size="18.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="btnRemoverDivida" mnemonicParsing="false" onAction="#removerDivida" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 10; -fx-border-radius: 10;" text="Remover Dívida">
                      <font>
                         <Font name="Segoe UI" size="18.0" />
                      </font>
@@ -183,11 +185,11 @@
             </HBox>
             <TableView fx:id="tblDividas" prefHeight="200.0" prefWidth="200.0">
               <columns>
-                <TableColumn fx:id="colEntidade" prefWidth="75.0" text="Entidade" />
-                <TableColumn fx:id="colTipo" prefWidth="75.0" text="Tipo" />
-                  <TableColumn fx:id="colTotal" prefWidth="75.0" text="Total" />
-                  <TableColumn fx:id="colPago" prefWidth="75.0" text="Pago" />
-                  <TableColumn fx:id="colEmFalta" prefWidth="75.0" text="Em Falta" />
+                <TableColumn fx:id="colEntidade" prefWidth="150.0" text="Entidade" />
+                <TableColumn fx:id="colTipo" prefWidth="150.0" text="Descrição" />
+                  <TableColumn fx:id="colTotal" prefWidth="120.0" text="Total" />
+                  <TableColumn fx:id="colPago" prefWidth="120.0" text="Pago" />
+                  <TableColumn fx:id="colEmFalta" prefWidth="120.0" text="Em Falta" />
               </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

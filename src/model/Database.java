@@ -1,3 +1,5 @@
+package model;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,19 +10,22 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.io.FileInputStream;
 
-class Database implements Serializable {
+public class Database implements Serializable {
   private static final long serialVersionUID = 1L;
   private static final String PATH = "Dados/";
-  private ArrayList<Conta> contas;
+  private Conta conta;
   private ArrayList<Transacao> transacoes;
   private ArrayList<Orcamento> orcamentos;
   private ArrayList<Categoria> categorias;
+  private ArrayList<Divida> dividas;
 
   public Database() {
-    this.contas = new ArrayList<Conta>();
+    // Cria uma conta padrão se não existir
+    this.conta = new Conta("Conta Principal", 0.0);
     this.transacoes = new ArrayList<Transacao>();
     this.orcamentos = new ArrayList<Orcamento>();
     this.categorias = new ArrayList<Categoria>();
+    this.dividas = new ArrayList<Divida>();
     inicializarCategoriasPadrao();
   }
 
@@ -63,6 +68,25 @@ class Database implements Serializable {
   }
 
   /**
+   * Retorna o valor total de todas as transações de uma categoria
+   * 
+   * @param categoria Categoria a ser verificada
+   * @return Valor total das transações da categoria
+   */
+  public double getValorCategoria(Categoria categoria) {
+    double valor = 0;
+    for (Transacao transacao : this.transacoes) {
+      if (transacao instanceof Despesa && transacao.getCategoria() != null) {
+        if (transacao.getCategoria().getNome().equalsIgnoreCase(categoria.getNome())) {
+          valor += transacao.getValor();
+        }
+      }
+    }
+    return valor;
+  }
+  
+
+  /**
    * Verifica se já existe uma conta com o mesmo nome
    * 
    * @param nome         Nome da conta a verificar
@@ -70,132 +94,36 @@ class Database implements Serializable {
    *                     ser null.
    * @return true se já existe uma conta com esse nome, false caso contrário
    */
-  public boolean existeContaComNome(String nome, Conta contaExcluir) {
-    if (nome == null || nome.trim().isEmpty()) {
-      return false;
+  /**
+   * Obtém a conta única do sistema
+   * 
+   * @return A conta única
+   */
+  public Conta getConta() {
+    if (this.conta == null) {
+      this.conta = new Conta("Conta Principal", 0.0);
     }
-    for (Conta conta : this.contas) {
-      // Ignora a conta que está sendo renomeada
-      if (contaExcluir != null && conta.getId().equals(contaExcluir.getId())) {
-        continue;
-      }
-      if (conta.getNome().equalsIgnoreCase(nome.trim())) {
-        return true;
-      }
-    }
-    return false;
+    return this.conta;
   }
 
   /**
-   * Verifica se já existe uma conta com o mesmo nome
+   * Define a conta única do sistema
    * 
-   * @param nome Nome da conta a verificar
-   * @return true se já existe uma conta com esse nome, false caso contrário
+   * @param conta Conta a ser definida
    */
-  public boolean existeContaComNome(String nome) {
-    return existeContaComNome(nome, null);
-  }
-
-  /**
-   * Atualiza o nome de uma conta, validando se o novo nome já existe
-   * 
-   * @param conta    Conta a ser atualizada
-   * @param novoNome Novo nome para a conta
-   * @throws IllegalArgumentException se já existir uma conta com o novo nome
-   */
-  public void atualizarNomeConta(Conta conta, String novoNome) {
+  public void setConta(Conta conta) {
     if (conta == null) {
       throw new IllegalArgumentException("A conta não pode ser nula.");
     }
-    if (novoNome == null || novoNome.trim().isEmpty()) {
-      throw new IllegalArgumentException("O nome da conta não pode ser vazio.");
-    }
-    if (existeContaComNome(novoNome, conta)) {
-      throw new IllegalArgumentException("Já existe uma conta com o nome '" + novoNome + "'.");
-    }
-    conta.setNome(novoNome.trim());
+    this.conta = conta;
     salvar("contas");
   }
 
   /**
-   * Adiciona uma nova conta ao banco de dados
-   * Valida se já existe uma conta com o mesmo nome
-   * 
-   * @param conta Conta a ser adicionada
-   * @throws IllegalArgumentException se já existir uma conta com o mesmo nome
+   * Atualiza a conta e salva automaticamente
    */
-  public void adicionarConta(Conta conta) {
-    if (conta == null) {
-      throw new IllegalArgumentException("A conta não pode ser nula.");
-    }
-
-    if (existeContaComNome(conta.getNome())) {
-      throw new IllegalArgumentException("Já existe uma conta com o nome '" + conta.getNome() + "'.");
-    }
-
-    this.contas.add(conta);
+  public void atualizarConta() {
     salvar("contas");
-  }
-
-  /**
-   * Remove uma conta pelo ID
-   * 
-   * @param id ID da conta (String UUID)
-   */
-  public void removerConta(String id) {
-    for (Conta conta : this.contas) {
-      if (conta.getId().equals(id)) {
-        this.contas.remove(conta);
-        salvar("contas");
-        return;
-      }
-    }
-    System.out.println("Conta com ID " + id + " não encontrada.");
-  }
-
-  /**
-   * Busca uma conta pelo ID
-   * 
-   * @param id ID da conta (String UUID)
-   * @return Conta encontrada ou null se não existir
-   */
-  public Conta buscarConta(String id) {
-    for (Conta conta : this.contas) {
-      if (conta.getId().equals(id)) {
-        return conta;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Busca uma conta pelo nome
-   * 
-   * @param nome Nome da conta
-   * @return Conta encontrada ou null se não existir
-   */
-  public Conta buscarContaPorNome(String nome) {
-    if (nome == null || nome.trim().isEmpty()) {
-      return null;
-    }
-    for (Conta conta : this.contas) {
-      if (conta.getNome().equalsIgnoreCase(nome.trim())) {
-        return conta;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Atualiza o saldo de uma conta e salva automaticamente
-   * Use este método quando modificar o saldo de uma conta diretamente
-   * 
-   * @param id ID da conta (String UUID)
-   */
-  public void atualizarConta(String id) {
-    if (buscarConta(id) != null) {
-      salvar("contas");
-    }
   }
 
   /**
@@ -214,6 +142,8 @@ class Database implements Serializable {
       salvar("contas");
       // Atualiza orçamentos relacionados (apenas para despesas)
       atualizarOrcamentoPorTransacao(transacao);
+      // Atualiza dívidas relacionadas (apenas para despesas com dividaId)
+      atualizarDividaPorTransacao(transacao);
       return true;
     }
     return false;
@@ -236,10 +166,10 @@ class Database implements Serializable {
     }
   }
 
-
   /**
-   * Cria um orçamento na base de dados se ele ainda não existir, 
+   * Cria um orçamento na base de dados se ele ainda não existir,
    * e salva automaticamente.
+   * 
    * @param orcamento Orcamento a ser criado.
    */
   public void criarOuAtualizarOrcamento(Orcamento orcamento) {
@@ -250,6 +180,36 @@ class Database implements Serializable {
       this.orcamentos.add(orcamento);
       salvar("orcamentos");
     }
+  }
+
+  /**
+   * Remove um orçamento do banco de dados
+   * 
+   * @param orcamento Orçamento a ser removido
+   */
+  public void removerOrcamento(Orcamento orcamento) {
+    if (orcamento != null && this.orcamentos.contains(orcamento)) {
+      this.orcamentos.remove(orcamento);
+      salvar("orcamentos");
+    }
+  }
+
+  /**
+   * Busca um orçamento pelo ID
+   * 
+   * @param id ID do orçamento
+   * @return O orçamento encontrado ou null se não existir
+   */
+  public Orcamento buscarOrcamento(String id) {
+    if (id == null || this.orcamentos == null) {
+      return null;
+    }
+    for (Orcamento orcamento : this.orcamentos) {
+      if (orcamento.getId().equals(id)) {
+        return orcamento;
+      }
+    }
+    return null;
   }
 
   /**
@@ -268,18 +228,18 @@ class Database implements Serializable {
       int anoOrcamento = orcamento.getDataInicio().getYear();
 
       // Se o orçamento é de um mês/ano anterior, reseta
-      if (anoOrcamento < anoAtual || 
+      if (anoOrcamento < anoAtual ||
           (anoOrcamento == anoAtual && mesOrcamento < mesAtual)) {
         // Reseta o valor gasto
         orcamento.alterarValorGasto(0);
-        
+
         // Atualiza o período para o mês atual
         LocalDateTime novoInicio = agora.withDayOfMonth(1)
             .withHour(0).withMinute(0).withSecond(0).withNano(0);
         int ultimoDia = agora.toLocalDate().lengthOfMonth();
         LocalDateTime novoFim = agora.withDayOfMonth(ultimoDia)
             .withHour(23).withMinute(59).withSecond(59).withNano(999999999);
-        
+
         // Atualiza as datas (precisa de método setter no Orcamento)
         orcamento.alterarPeriodo(novoInicio, novoFim);
         houveAlteracao = true;
@@ -292,34 +252,35 @@ class Database implements Serializable {
   }
 
   /**
-   * Recalcula o valor gasto de todos os orçamentos baseado nas transações existentes.
+   * Recalcula o valor gasto de todos os orçamentos baseado nas transações
+   * existentes.
    * Útil ao carregar a Database para garantir que os valores estão corretos.
    */
   public void recalcularValorGastoOrcamentos() {
     for (Orcamento orcamento : this.orcamentos) {
       double valorGastoTotal = 0;
-      
+
       // Soma todas as despesas da categoria dentro do período do orçamento
       for (Transacao transacao : this.transacoes) {
-        if (transacao instanceof Despesa && 
+        if (transacao instanceof Despesa &&
             transacao.getCategoria() != null &&
             transacao.getCategoria().equals(orcamento.getCategoria())) {
-          
+
           LocalDateTime dataTransacao = transacao.getData();
-          boolean dentroDoPeriodo = (dataTransacao.isAfter(orcamento.getDataInicio()) || 
-                                     dataTransacao.isEqual(orcamento.getDataInicio())) &&
-                                    (dataTransacao.isBefore(orcamento.getDataFim()) || 
-                                     dataTransacao.isEqual(orcamento.getDataFim()));
-          
+          boolean dentroDoPeriodo = (dataTransacao.isAfter(orcamento.getDataInicio()) ||
+              dataTransacao.isEqual(orcamento.getDataInicio())) &&
+              (dataTransacao.isBefore(orcamento.getDataFim()) ||
+                  dataTransacao.isEqual(orcamento.getDataFim()));
+
           if (dentroDoPeriodo) {
             valorGastoTotal += transacao.getValor();
           }
         }
       }
-      
+
       orcamento.alterarValorGasto(valorGastoTotal);
     }
-    
+
     salvar("orcamentos");
   }
 
@@ -334,27 +295,59 @@ class Database implements Serializable {
     if (transacao == null || transacao.getCategoria() == null) {
       return;
     }
-    
+
     // Apenas despesas afetam o orçamento (receitas não)
     if (!(transacao instanceof Despesa)) {
       return;
     }
-    
+
     LocalDateTime dataTransacao = transacao.getData();
-    
+
     for (Orcamento orcamento : this.orcamentos) {
       if (orcamento.getCategoria().equals(transacao.getCategoria())) {
         // Verifica se a transação está dentro do período do orçamento
-        boolean dentroDoPeriodo = (dataTransacao.isAfter(orcamento.getDataInicio()) || 
-                                   dataTransacao.isEqual(orcamento.getDataInicio())) &&
-                                  (dataTransacao.isBefore(orcamento.getDataFim()) || 
-                                   dataTransacao.isEqual(orcamento.getDataFim()));
-        
+        boolean dentroDoPeriodo = (dataTransacao.isAfter(orcamento.getDataInicio()) ||
+            dataTransacao.isEqual(orcamento.getDataInicio())) &&
+            (dataTransacao.isBefore(orcamento.getDataFim()) ||
+                dataTransacao.isEqual(orcamento.getDataFim()));
+
         if (dentroDoPeriodo) {
           orcamento.alterarValorGasto(orcamento.getValorGasto() + transacao.getValor());
           salvar("orcamentos");
         }
         break;
+      }
+    }
+  }
+
+  /**
+   * Atualiza a dívida relacionada quando uma despesa é processada
+   * Apenas funciona para despesas que têm um dividaId associado
+   * 
+   * @param transacao Transação processada
+   */
+  public void atualizarDividaPorTransacao(Transacao transacao) {
+    if (transacao == null || !(transacao instanceof Despesa)) {
+      return;
+    }
+
+    Despesa despesa = (Despesa) transacao;
+    
+    // Verifica se a despesa está relacionada a uma dívida
+    if (!despesa.estaRelacionadaADivida()) {
+      return;
+    }
+
+    String dividaId = despesa.getDividaId();
+    Divida divida = buscarDivida(dividaId);
+
+    if (divida != null) {
+      try {
+        divida.adicionarPagamento(despesa.getValor());
+        salvar("dividas");
+      } catch (IllegalArgumentException e) {
+        // Se o pagamento exceder o total, não atualiza
+        System.out.println("Aviso: " + e.getMessage());
       }
     }
   }
@@ -430,11 +423,17 @@ class Database implements Serializable {
     return null;
   }
 
+  /**
+   * Retorna uma lista com a única conta (para compatibilidade)
+   * 
+   * @return Lista contendo a única conta
+   */
   public ArrayList<Conta> getContas() {
-    if (this.contas.isEmpty()) {
-      return new ArrayList<Conta>();
+    ArrayList<Conta> lista = new ArrayList<Conta>();
+    if (this.conta != null) {
+      lista.add(this.conta);
     }
-    return contas;
+    return lista;
   }
 
   public ArrayList<Transacao> getTransacoes() {
@@ -456,6 +455,68 @@ class Database implements Serializable {
       return new ArrayList<Categoria>();
     }
     return categorias;
+  }
+
+  public ArrayList<Divida> getDividas() {
+    if (this.dividas == null) {
+      return new ArrayList<Divida>();
+    }
+    return dividas;
+  }
+
+  /**
+   * Adiciona uma dívida ao banco de dados
+   * 
+   * @param divida Dívida a ser adicionada
+   */
+  public void adicionarDivida(Divida divida) {
+    if (divida == null) {
+      throw new IllegalArgumentException("A dívida não pode ser nula.");
+    }
+    if (this.dividas.contains(divida)) {
+      return;
+    }
+    this.dividas.add(divida);
+    salvar("dividas");
+  }
+
+  /**
+   * Remove uma dívida do banco de dados
+   * 
+   * @param divida Dívida a ser removida
+   */
+  public void removerDivida(Divida divida) {
+    if (divida != null && this.dividas.contains(divida)) {
+      this.dividas.remove(divida);
+      salvar("dividas");
+    }
+  }
+
+  /**
+   * Busca uma dívida pelo ID
+   * 
+   * @param id ID da dívida
+   * @return A dívida encontrada ou null se não existir
+   */
+  public Divida buscarDivida(String id) {
+    if (id == null || this.dividas == null) {
+      return null;
+    }
+    for (Divida divida : this.dividas) {
+      if (divida.getId().equals(id)) {
+        return divida;
+      }
+    }
+    return null;
+  }
+
+  public String getIdDividaPorNome(String nome) {
+    for (Divida divida : this.dividas) {
+      if (divida.getNomeEntidade().equalsIgnoreCase(nome)) {
+        return divida.getId();
+      }
+    }
+    return "";
   }
 
   /**
@@ -483,7 +544,12 @@ class Database implements Serializable {
 
       switch (nome) {
         case "contas":
-          out.writeObject(this.contas);
+          // Salva como ArrayList para compatibilidade (com apenas uma conta)
+          ArrayList<Conta> listaConta = new ArrayList<Conta>();
+          if (this.conta != null) {
+            listaConta.add(this.conta);
+          }
+          out.writeObject(listaConta);
           break;
         case "transacoes":
           out.writeObject(this.transacoes);
@@ -493,6 +559,9 @@ class Database implements Serializable {
           break;
         case "categorias":
           out.writeObject(this.categorias);
+          break;
+        case "dividas":
+          out.writeObject(this.dividas);
           break;
         default:
           System.out.println("Nome de arquivo inválido para salvar: " + nome);
@@ -514,6 +583,7 @@ class Database implements Serializable {
     salvar("transacoes");
     salvar("orcamentos");
     salvar("categorias");
+    salvar("dividas");
   }
 
   /**
@@ -524,7 +594,7 @@ class Database implements Serializable {
    */
   public static Database carregar() {
     Database db = new Database();
-    String[] nomes = { "contas", "orcamentos", "categorias", "transacoes" };
+    String[] nomes = { "contas", "orcamentos", "categorias", "transacoes", "dividas" };
 
     for (String nome : nomes) {
       try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(PATH + nome + ".dat"))) {
@@ -535,7 +605,18 @@ class Database implements Serializable {
             if (obj instanceof ArrayList) {
               @SuppressWarnings("unchecked")
               ArrayList<Conta> contasCarregadas = (ArrayList<Conta>) obj;
-              db.contas = contasCarregadas;
+              // Pega a primeira conta (ou cria uma padrão se não houver)
+              if (!contasCarregadas.isEmpty()) {
+                db.conta = contasCarregadas.get(0);
+              } else {
+                db.conta = new Conta("Conta Principal", 0.0);
+              }
+            } else if (obj instanceof Conta) {
+              // Compatibilidade: se for um objeto Conta diretamente
+              db.conta = (Conta) obj;
+            } else {
+              // Se não conseguir carregar, cria uma conta padrão
+              db.conta = new Conta("Conta Principal", 0.0);
             }
             break;
           case "transacoes":
@@ -559,6 +640,13 @@ class Database implements Serializable {
               db.categorias = categoriasCarregadas;
             }
             break;
+          case "dividas":
+            if (obj instanceof ArrayList) {
+              @SuppressWarnings("unchecked")
+              ArrayList<Divida> dividasCarregadas = (ArrayList<Divida>) obj;
+              db.dividas = dividasCarregadas;
+            }
+            break;
         }
       } catch (java.io.FileNotFoundException e) {
         // Arquivo não existe ainda, mantém lista vazia (normal na primeira execução)
@@ -567,28 +655,29 @@ class Database implements Serializable {
         System.out.println("Erro ao carregar " + nome + ": " + e.getMessage());
       }
     }
-    
+
     // Garante que as categorias padrão sempre existam após carregar
     db.inicializarCategoriasPadrao();
     // Salva se alguma categoria padrão foi adicionada
     db.salvar("categorias");
-    
+
     // Reseta orçamentos mensais se necessário
     db.resetarOrcamentosMensais();
-    
+
     // Recalcula valores gastos baseado nas transações existentes
     db.recalcularValorGastoOrcamentos();
-    
+
     return db;
   }
 
   @Override
   public String toString() {
     return "Database{" +
-        "contas=" + contas +
+        "conta=" + conta +
         ", transacoes=" + transacoes +
         ", orcamentos=" + orcamentos +
         ", categorias=" + categorias +
+        ", dividas=" + dividas +
         '}';
   }
 }
