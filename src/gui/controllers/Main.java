@@ -6,8 +6,20 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.fxml.FXMLLoader;
 
-
+/**
+ * Classe principal da aplicação JavaFX.
+ * Inicializa e exibe a interface gráfica do sistema de gerenciamento financeiro.
+ * 
+ * @author Sistema Carteira
+ * @version 1.0
+ */
 public class Main extends Application {
+	
+	/**
+	 * Inicializa e exibe a janela principal da aplicação.
+	 * 
+	 * @param primaryStage Palco principal da aplicação
+	 */
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -21,6 +33,11 @@ public class Main extends Application {
 		}
 	}
 	
+	/**
+	 * Método principal que inicia a aplicação JavaFX.
+	 * 
+	 * @param args Argumentos da linha de comando
+	 */
 	public static void main(String[] args) {
 		launch(args);
 	}

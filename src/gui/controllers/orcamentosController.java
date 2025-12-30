@@ -18,6 +18,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+/**
+ * Controller da interface de gerenciamento de orçamentos.
+ * Gerencia a criação, edição e remoção de orçamentos.
+ * 
+ * @author Sistema Carteira
+ * @version 1.0
+ */
 public class orcamentosController {
 
     private Database db;

@@ -10,6 +10,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.io.FileInputStream;
 
+/**
+ * Classe que representa o banco de dados do sistema.
+ * Gerencia contas, transações, orçamentos, categorias e dívidas.
+ * Os dados são persistidos em arquivos .dat no diretório Dados/.
+ * 
+ * @author Sistema Carteira
+ * @version 1.0
+ */
 public class Database implements Serializable {
   private static final long serialVersionUID = 1L;
   private static final String PATH = "Dados/";
@@ -19,8 +27,11 @@ public class Database implements Serializable {
   private ArrayList<Categoria> categorias;
   private ArrayList<Divida> dividas;
 
+  /**
+   * Construtor da classe Database.
+   * Inicializa todas as listas e cria categorias padrão.
+   */
   public Database() {
-    // Cria uma conta padrão se não existir
     this.conta = new Conta("Conta Principal", 0.0);
     this.transacoes = new ArrayList<Transacao>();
     this.orcamentos = new ArrayList<Orcamento>();
@@ -35,7 +46,6 @@ public class Database implements Serializable {
    * São criadas automaticamente se não existirem.
    */
   private void inicializarCategoriasPadrao() {
-    // Lista de categorias padrão
     Categoria[] categoriasPadrao = {
         new Categoria("Alimentação", "Gastos com comida e bebida", true),
         new Categoria("Transporte", "Gastos com transporte e combustível", true),
@@ -47,18 +57,12 @@ public class Database implements Serializable {
         new Categoria("Outros", "Outras receitas e despesas", true)
     };
 
-    // Adiciona apenas as categorias padrão que ainda não existem
     for (Categoria categoriaPadrao : categoriasPadrao) {
       boolean existe = false;
       for (Categoria categoriaExistente : this.categorias) {
         if (categoriaExistente.getNome().equalsIgnoreCase(categoriaPadrao.getNome())) {
           existe = true;
-          // Se existe mas não está marcada como padrão, atualiza
-          if (!categoriaExistente.isPadrao()) {
-            // Não podemos modificar diretamente, então removemos e adicionamos a padrão
-            // Mas isso só acontece se não for padrão, então vamos apenas garantir
-            break;
-          }
+          break;
         }
       }
       if (!existe) {
@@ -68,10 +72,10 @@ public class Database implements Serializable {
   }
 
   /**
-   * Retorna o valor total de todas as transações de uma categoria
+   * Retorna o valor total de todas as despesas de uma categoria.
    * 
    * @param categoria Categoria a ser verificada
-   * @return Valor total das transações da categoria
+   * @return Valor total das despesas da categoria
    */
   public double getValorCategoria(Categoria categoria) {
     double valor = 0;
@@ -84,18 +88,10 @@ public class Database implements Serializable {
     }
     return valor;
   }
-  
 
   /**
-   * Verifica se já existe uma conta com o mesmo nome
-   * 
-   * @param nome         Nome da conta a verificar
-   * @param contaExcluir Conta a excluir da verificação (útil ao renomear). Pode
-   *                     ser null.
-   * @return true se já existe uma conta com esse nome, false caso contrário
-   */
-  /**
-   * Obtém a conta única do sistema
+   * Obtém a conta única do sistema.
+   * Cria uma conta padrão se não existir.
    * 
    * @return A conta única
    */
@@ -107,9 +103,11 @@ public class Database implements Serializable {
   }
 
   /**
-   * Define a conta única do sistema
+   * Define a conta única do sistema.
+   * Salva automaticamente após a alteração.
    * 
    * @param conta Conta a ser definida
+   * @throws IllegalArgumentException se a conta for null
    */
   public void setConta(Conta conta) {
     if (conta == null) {
@@ -120,7 +118,7 @@ public class Database implements Serializable {
   }
 
   /**
-   * Atualiza a conta e salva automaticamente
+   * Atualiza a conta e salva automaticamente.
    */
   public void atualizarConta() {
     salvar("contas");
@@ -138,11 +136,8 @@ public class Database implements Serializable {
     if (transacao.processar()) {
       this.transacoes.add(transacao);
       salvar("transacoes");
-      // Também salva contas pois o saldo pode ter mudado
       salvar("contas");
-      // Atualiza orçamentos relacionados (apenas para despesas)
       atualizarOrcamentoPorTransacao(transacao);
-      // Atualiza dívidas relacionadas (apenas para despesas com dividaId)
       atualizarDividaPorTransacao(transacao);
       return true;
     }
@@ -155,10 +150,15 @@ public class Database implements Serializable {
     }
     this.transacoes.add(transacao);
     salvar("transacoes");
-    salvar("contas");
-  }
+      salvar("contas");
+    }
 
-  public void removerTransacao(Transacao transacao) {
+    /**
+     * Remove uma transação do banco de dados.
+     * 
+     * @param transacao Transação a ser removida
+     */
+    public void removerTransacao(Transacao transacao) {
     if (this.transacoes.contains(transacao)) {
       this.transacoes.remove(transacao);
       this.conta.depositar(transacao.getValor());
@@ -168,10 +168,11 @@ public class Database implements Serializable {
   }
 
   /**
-   * Cria um orçamento na base de dados se ele ainda não existir,
-   * e salva automaticamente.
+   * Cria um orçamento na base de dados se ele ainda não existir.
+   * Salva automaticamente após a criação.
    * 
-   * @param orcamento Orcamento a ser criado.
+   * @param orcamento Orçamento a ser criado
+   * @throws IllegalArgumentException se o orçamento for null
    */
   public void criarOuAtualizarOrcamento(Orcamento orcamento) {
     if (orcamento == null) {
@@ -184,7 +185,8 @@ public class Database implements Serializable {
   }
 
   /**
-   * Remove um orçamento do banco de dados
+   * Remove um orçamento do banco de dados.
+   * Salva automaticamente após a remoção.
    * 
    * @param orcamento Orçamento a ser removido
    */
@@ -196,7 +198,7 @@ public class Database implements Serializable {
   }
 
   /**
-   * Busca um orçamento pelo ID
+   * Busca um orçamento pelo ID.
    * 
    * @param id ID do orçamento
    * @return O orçamento encontrado ou null se não existir
@@ -217,6 +219,7 @@ public class Database implements Serializable {
    * Reseta os orçamentos que estão em meses anteriores.
    * Atualiza o período para o mês atual e zera o valor gasto.
    * Deve ser chamado periodicamente (ex: ao carregar a Database).
+   * Salva automaticamente se houver alterações.
    */
   public void resetarOrcamentosMensais() {
     LocalDateTime agora = LocalDateTime.now();
@@ -228,20 +231,16 @@ public class Database implements Serializable {
       int mesOrcamento = orcamento.getDataInicio().getMonthValue();
       int anoOrcamento = orcamento.getDataInicio().getYear();
 
-      // Se o orçamento é de um mês/ano anterior, reseta
       if (anoOrcamento < anoAtual ||
           (anoOrcamento == anoAtual && mesOrcamento < mesAtual)) {
-        // Reseta o valor gasto
         orcamento.alterarValorGasto(0);
 
-        // Atualiza o período para o mês atual
         LocalDateTime novoInicio = agora.withDayOfMonth(1)
             .withHour(0).withMinute(0).withSecond(0).withNano(0);
         int ultimoDia = agora.toLocalDate().lengthOfMonth();
         LocalDateTime novoFim = agora.withDayOfMonth(ultimoDia)
             .withHour(23).withMinute(59).withSecond(59).withNano(999999999);
 
-        // Atualiza as datas (precisa de método setter no Orcamento)
         orcamento.alterarPeriodo(novoInicio, novoFim);
         houveAlteracao = true;
       }
@@ -253,15 +252,14 @@ public class Database implements Serializable {
   }
 
   /**
-   * Recalcula o valor gasto de todos os orçamentos baseado nas transações
-   * existentes.
+   * Recalcula o valor gasto de todos os orçamentos baseado nas transações existentes.
    * Útil ao carregar a Database para garantir que os valores estão corretos.
+   * Salva automaticamente após o recálculo.
    */
   public void recalcularValorGastoOrcamentos() {
     for (Orcamento orcamento : this.orcamentos) {
       double valorGastoTotal = 0;
 
-      // Soma todas as despesas da categoria dentro do período do orçamento
       for (Transacao transacao : this.transacoes) {
         if (transacao instanceof Despesa &&
             transacao.getCategoria() != null &&
@@ -287,8 +285,9 @@ public class Database implements Serializable {
 
   /**
    * Atualiza o orçamento relacionado à categoria de uma transação, se existir.
-   * Apenas DESPESAS são contabilizadas no orçamento.
+   * Apenas despesas são contabilizadas no orçamento.
    * Verifica se a transação está dentro do período do orçamento.
+   * Salva automaticamente se houver alterações.
    * 
    * @param transacao A transação que foi processada
    */
@@ -297,7 +296,6 @@ public class Database implements Serializable {
       return;
     }
 
-    // Apenas despesas afetam o orçamento (receitas não)
     if (!(transacao instanceof Despesa)) {
       return;
     }
@@ -306,7 +304,6 @@ public class Database implements Serializable {
 
     for (Orcamento orcamento : this.orcamentos) {
       if (orcamento.getCategoria().equals(transacao.getCategoria())) {
-        // Verifica se a transação está dentro do período do orçamento
         boolean dentroDoPeriodo = (dataTransacao.isAfter(orcamento.getDataInicio()) ||
             dataTransacao.isEqual(orcamento.getDataInicio())) &&
             (dataTransacao.isBefore(orcamento.getDataFim()) ||
@@ -322,8 +319,9 @@ public class Database implements Serializable {
   }
 
   /**
-   * Atualiza a dívida relacionada quando uma despesa é processada
-   * Apenas funciona para despesas que têm um dividaId associado
+   * Atualiza a dívida relacionada quando uma despesa é processada.
+   * Apenas funciona para despesas que têm um dividaId associado.
+   * Salva automaticamente se houver alterações.
    * 
    * @param transacao Transação processada
    */
@@ -334,7 +332,6 @@ public class Database implements Serializable {
 
     Despesa despesa = (Despesa) transacao;
     
-    // Verifica se a despesa está relacionada a uma dívida
     if (!despesa.estaRelacionadaADivida()) {
       return;
     }
@@ -347,16 +344,27 @@ public class Database implements Serializable {
         divida.adicionarPagamento(despesa.getValor());
         salvar("dividas");
       } catch (IllegalArgumentException e) {
-        // Se o pagamento exceder o total, não atualiza
         System.out.println("Aviso: " + e.getMessage());
       }
     }
   }
 
+  /**
+   * Verifica se uma categoria existe no banco de dados.
+   * 
+   * @param categoria Categoria a verificar
+   * @return true se existe, false caso contrário
+   */
   public boolean existeCategoria(Categoria categoria) {
     return this.categorias.contains(categoria);
   }
 
+  /**
+   * Adiciona uma categoria ao banco de dados.
+   * Salva automaticamente após a adição.
+   * 
+   * @param categoria Categoria a ser adicionada
+   */
   public void adicionarCategoria(Categoria categoria) {
     if (this.categorias.contains(categoria)) {
       return;
@@ -366,11 +374,12 @@ public class Database implements Serializable {
   }
 
   /**
-   * Remove uma categoria do banco de dados
-   * Categorias padrão não podem ser removidas
+   * Remove uma categoria do banco de dados.
+   * Categorias padrão não podem ser removidas.
+   * Salva automaticamente após a remoção.
    * 
    * @param categoria Categoria a ser removida
-   * @throws IllegalArgumentException se a categoria for padrão
+   * @throws IllegalArgumentException se a categoria for padrão ou null
    */
   public void removerCategoria(Categoria categoria) {
     if (categoria == null) {
@@ -386,11 +395,12 @@ public class Database implements Serializable {
   }
 
   /**
-   * Remove uma categoria pelo nome
-   * Categorias padrão não podem ser removidas
+   * Remove uma categoria pelo nome.
+   * Categorias padrão não podem ser removidas.
+   * Salva automaticamente após a remoção.
    * 
    * @param nome Nome da categoria a ser removida
-   * @throws IllegalArgumentException se a categoria for padrão ou não existir
+   * @throws IllegalArgumentException se a categoria for padrão, não existir ou o nome for vazio
    */
   public void removerCategoriaPorNome(String nome) {
     if (nome == null || nome.trim().isEmpty()) {
@@ -407,7 +417,7 @@ public class Database implements Serializable {
   }
 
   /**
-   * Busca uma categoria pelo nome
+   * Busca uma categoria pelo nome (case-insensitive).
    * 
    * @param nome Nome da categoria
    * @return Categoria encontrada ou null se não existir
@@ -425,7 +435,7 @@ public class Database implements Serializable {
   }
 
   /**
-   * Retorna uma lista com a única conta (para compatibilidade)
+   * Retorna uma lista com a única conta (para compatibilidade).
    * 
    * @return Lista contendo a única conta
    */
@@ -437,6 +447,11 @@ public class Database implements Serializable {
     return lista;
   }
 
+  /**
+   * Retorna a lista de transações.
+   * 
+   * @return Lista de transações (vazia se não houver transações)
+   */
   public ArrayList<Transacao> getTransacoes() {
     if (this.transacoes.isEmpty()) {
       return new ArrayList<Transacao>();
@@ -444,6 +459,11 @@ public class Database implements Serializable {
     return transacoes;
   }
 
+  /**
+   * Retorna a lista de orçamentos.
+   * 
+   * @return Lista de orçamentos (vazia se não houver orçamentos)
+   */
   public ArrayList<Orcamento> getOrcamentos() {
     if (this.orcamentos.isEmpty()) {
       return new ArrayList<Orcamento>();
@@ -451,6 +471,11 @@ public class Database implements Serializable {
     return orcamentos;
   }
 
+  /**
+   * Retorna a lista de categorias.
+   * 
+   * @return Lista de categorias (vazia se não houver categorias)
+   */
   public ArrayList<Categoria> getCategorias() {
     if (this.categorias.isEmpty()) {
       return new ArrayList<Categoria>();
@@ -458,6 +483,11 @@ public class Database implements Serializable {
     return categorias;
   }
 
+  /**
+   * Retorna a lista de dívidas.
+   * 
+   * @return Lista de dívidas (vazia se não houver dívidas)
+   */
   public ArrayList<Divida> getDividas() {
     if (this.dividas == null) {
       return new ArrayList<Divida>();
@@ -466,9 +496,11 @@ public class Database implements Serializable {
   }
 
   /**
-   * Adiciona uma dívida ao banco de dados
+   * Adiciona uma dívida ao banco de dados.
+   * Salva automaticamente após a adição.
    * 
    * @param divida Dívida a ser adicionada
+   * @throws IllegalArgumentException se a dívida for null
    */
   public void adicionarDivida(Divida divida) {
     if (divida == null) {
@@ -482,7 +514,8 @@ public class Database implements Serializable {
   }
 
   /**
-   * Remove uma dívida do banco de dados
+   * Remove uma dívida do banco de dados.
+   * Salva automaticamente após a remoção.
    * 
    * @param divida Dívida a ser removida
    */
@@ -494,7 +527,7 @@ public class Database implements Serializable {
   }
 
   /**
-   * Busca uma dívida pelo ID
+   * Busca uma dívida pelo ID.
    * 
    * @param id ID da dívida
    * @return A dívida encontrada ou null se não existir
@@ -511,6 +544,12 @@ public class Database implements Serializable {
     return null;
   }
 
+  /**
+   * Busca o ID de uma dívida pelo nome da entidade (case-insensitive).
+   * 
+   * @param nome Nome da entidade
+   * @return ID da dívida ou string vazia se não encontrada
+   */
   public String getIdDividaPorNome(String nome) {
     for (Divida divida : this.dividas) {
       if (divida.getNomeEntidade().equalsIgnoreCase(nome)) {
@@ -521,7 +560,8 @@ public class Database implements Serializable {
   }
 
   /**
-   * Garante que o diretório de dados existe
+   * Garante que o diretório de dados existe.
+   * Cria o diretório se não existir.
    */
   private void garantirDiretorio() {
     File diretorio = new File(PATH);
@@ -531,10 +571,9 @@ public class Database implements Serializable {
   }
 
   /**
-   * Método para salvar uma lista específica do banco de dados em um arquivo
+   * Salva uma lista específica do banco de dados em um arquivo.
    * 
-   * @param nome Nome do tipo de dado a salvar (contas, transacoes, orcamentos,
-   *             categorias)
+   * @param nome Nome do tipo de dado a salvar (contas, transacoes, orcamentos, categorias, dividas)
    */
   public void salvar(String nome) {
     nome = nome.toLowerCase();
@@ -577,7 +616,7 @@ public class Database implements Serializable {
   }
 
   /**
-   * Salva todos os dados do banco de dados de uma vez
+   * Salva todos os dados do banco de dados de uma vez.
    */
   public void salvarTudo() {
     salvar("contas");
@@ -588,8 +627,9 @@ public class Database implements Serializable {
   }
 
   /**
-   * Método para carregar o estado do banco de dados a partir dos arquivos
-   * Garante que as categorias padrão sempre existam após o carregamento
+   * Carrega o estado do banco de dados a partir dos arquivos.
+   * Garante que as categorias padrão sempre existam após o carregamento.
+   * Reseta orçamentos mensais e recalcula valores gastos automaticamente.
    * 
    * @return O objeto Database carregado dos arquivos
    */

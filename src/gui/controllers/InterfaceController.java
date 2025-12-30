@@ -28,7 +28,13 @@ import model.Receita;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-
+/**
+ * Controller da interface principal da aplicação.
+ * Gerencia a exibição do saldo, gráficos de despesas e receitas.
+ * 
+ * @author Sistema Carteira
+ * @version 1.0
+ */
 public class InterfaceController {
     private Database db;
     
@@ -47,9 +53,12 @@ public class InterfaceController {
     @FXML
     private BarChart<String, Number> barChartMensal;
     
+    /**
+     * Inicializa o controller e carrega os dados.
+     * Chamado automaticamente pelo JavaFX após o carregamento do FXML.
+     */
     @FXML
     public void initialize() {
-        // Carregar Database
         db = Database.carregar();
         atualizarInterface();
         

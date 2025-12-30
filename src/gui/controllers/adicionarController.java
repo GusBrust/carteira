@@ -20,6 +20,13 @@ import model.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Controller da interface de adicionar transações.
+ * Gerencia a criação de receitas, despesas e despesas fixas.
+ * 
+ * @author Sistema Carteira
+ * @version 1.0
+ */
 public class adicionarController {
 
     private Database db;

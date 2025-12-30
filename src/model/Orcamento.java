@@ -4,6 +4,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Classe que representa um orçamento financeiro.
+ * Um orçamento define um limite de gastos para uma categoria em um período específico.
+ * 
+ * @author Sistema Carteira
+ * @version 1.0
+ */
 public class Orcamento implements Serializable {
     private static final long serialVersionUID = 1L;
     private final String id;
@@ -14,12 +21,19 @@ public class Orcamento implements Serializable {
     private LocalDateTime dataFim;
     private Categoria categoria;
 
+    /**
+     * Construtor da classe Orcamento.
+     * Define o período como o mês atual (do primeiro ao último dia).
+     * 
+     * @param nome Nome do orçamento
+     * @param valorLimite Valor limite do orçamento
+     * @param categoria Categoria do orçamento
+     */
     public Orcamento(String nome, double valorLimite, Categoria categoria) {
         this.id = UUID.randomUUID().toString();
         this.nome = nome;
         this.valorLimite = valorLimite;
         this.valorGasto = 0;
-        // Define o período do orçamento como o primeiro dia do mês atual até o último dia do mês atual
         LocalDateTime agora = LocalDateTime.now();
         this.dataInicio = agora.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
         int ultimoDia = agora.toLocalDate().lengthOfMonth();
@@ -28,48 +42,99 @@ public class Orcamento implements Serializable {
         this.categoria = categoria;
     }
 
+    /**
+     * Retorna o ID único do orçamento.
+     * 
+     * @return ID do orçamento
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Retorna o nome do orçamento.
+     * 
+     * @return Nome do orçamento
+     */
     public String getNome() {
         return nome;
     }
 
+    /**
+     * Retorna o valor limite do orçamento.
+     * 
+     * @return Valor limite
+     */
     public double getValorLimite() {
         return valorLimite;
     }
 
+    /**
+     * Retorna o valor gasto no orçamento.
+     * 
+     * @return Valor gasto
+     */
     public double getValorGasto() {
         return valorGasto;
     }
 
+    /**
+     * Retorna a data de início do período do orçamento.
+     * 
+     * @return Data de início
+     */
     public LocalDateTime getDataInicio() {
         return dataInicio;
     }
 
+    /**
+     * Retorna a data de fim do período do orçamento.
+     * 
+     * @return Data de fim
+     */
     public LocalDateTime getDataFim() {
         return dataFim;
     }
 
+    /**
+     * Retorna a categoria do orçamento.
+     * 
+     * @return Categoria
+     */
     public Categoria getCategoria() {
         return categoria;
     }
 
+    /**
+     * Altera o valor limite do orçamento.
+     * 
+     * @param valorLimite Novo valor limite
+     */
     public void alterarValorLimite(double valorLimite) {
         this.valorLimite = valorLimite;
     }
 
+    /**
+     * Altera o valor gasto no orçamento.
+     * 
+     * @param valorGasto Novo valor gasto
+     */
     public void alterarValorGasto(double valorGasto) {
         this.valorGasto = valorGasto;
     }
 
+    /**
+     * Altera a categoria do orçamento.
+     * 
+     * @param categoria Nova categoria
+     */
     public void alterarCategoria(Categoria categoria) {
         this.categoria = categoria;
     }
 
     /**
-     * Altera o período do orçamento
+     * Altera o período do orçamento.
+     * 
      * @param dataInicio Nova data de início
      * @param dataFim Nova data de fim
      */

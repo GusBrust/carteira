@@ -22,6 +22,13 @@ import model.Despesa;
 import model.Receita;
 import model.Transferencia;
 
+/**
+ * Controller da interface de visualização de transações.
+ * Gerencia a exibição e remoção de transações.
+ * 
+ * @author Sistema Carteira
+ * @version 1.0
+ */
 public class transacoesController {
     private Database db;
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");

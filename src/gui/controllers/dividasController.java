@@ -19,6 +19,13 @@ import model.Divida;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+/**
+ * Controller da interface de gerenciamento de dívidas.
+ * Gerencia a criação, edição e remoção de dívidas.
+ * 
+ * @author Sistema Carteira
+ * @version 1.0
+ */
 public class dividasController {
 
     private Database db;
