@@ -12,6 +12,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import model.*;
@@ -36,6 +37,8 @@ public class adicionarController {
     private ChoiceBox<String> cbDividaTransacao;
     @FXML
     private CheckBox chkDespesaFixa;
+    @FXML
+    private Button btnNovaCategoria;
     @FXML
     private DatePicker dpData;
     @FXML
@@ -251,6 +254,47 @@ public class adicionarController {
             if (!divida.estaPaga()) {
                 cbDividaTransacao.getItems().add(divida.getNomeEntidade());
             }
+        }
+    }
+    
+    private void atualizarListaCategorias() {
+        cbCategoria.getItems().clear();
+        for (Categoria categoria : db.getCategorias()) {
+            cbCategoria.getItems().add(categoria.getNome());
+        }
+    }
+    
+    @FXML
+    void criarNovaCategoria() {
+        // Criar diálogo para inserir nome da categoria
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nova Categoria");
+        dialog.setHeaderText("Criar Nova Categoria");
+        dialog.setContentText("Nome da categoria:");
+        
+        // Mostrar diálogo e obter resultado
+        java.util.Optional<String> resultado = dialog.showAndWait();
+        
+        if (resultado.isPresent() && !resultado.get().trim().isEmpty()) {
+            String nomeCategoria = resultado.get().trim();
+            
+            // Verificar se a categoria já existe
+            if (db.buscarCategoriaPorNome(nomeCategoria) != null) {
+                mostrarErro("Já existe uma categoria com esse nome.");
+                return;
+            }
+            
+            // Criar nova categoria (não padrão)
+            Categoria novaCategoria = new Categoria(nomeCategoria, "", false);
+            db.adicionarCategoria(novaCategoria);
+            
+            // Atualizar lista de categorias
+            atualizarListaCategorias();
+            
+            // Selecionar a nova categoria
+            cbCategoria.getSelectionModel().select(nomeCategoria);
+            
+            mostrarSucesso("Categoria criada com sucesso!");
         }
     }
 

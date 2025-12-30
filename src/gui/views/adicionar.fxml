@@ -171,6 +171,14 @@
                               </font>
                            </Label>
                            <ChoiceBox fx:id="cbCategoria" prefWidth="200.0" />
+                           <Button fx:id="btnNovaCategoria" mnemonicParsing="false" onAction="#criarNovaCategoria" prefWidth="150.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 5; -fx-border-radius: 5;" text="+ Nova Categoria">
+                              <font>
+                                 <Font name="Segoe UI" size="12.0" />
+                              </font>
+                              <padding>
+                                 <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+                              </padding>
+                           </Button>
                         </children>
                      </HBox>
                      <HBox alignment="CENTER_LEFT" spacing="10.0">
