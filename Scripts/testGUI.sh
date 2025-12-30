@@ -3,6 +3,11 @@
 # Script para testar a GUI do App Carteira
 # Ajuste o caminho do JavaFX conforme sua instalação
 
+# Obter o diretório raiz do projeto (um nível acima de Scripts/)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+cd "$PROJECT_ROOT"
+
 echo "=== Teste da GUI - App Carteira ==="
 echo ""
 
@@ -30,7 +35,7 @@ else
     echo "1. Instalar JavaFX (veja INSTALAR_JAVAFX.md)"
     echo "2. Definir variável de ambiente:"
     echo "   export JAVAFX_HOME=/caminho/para/javafx-sdk-21"
-    echo "   ./testGUI.sh"
+    echo "   ./Scripts/testGUI.sh"
     echo "3. Ou ajustar JAVAFX_PATH diretamente no script"
     exit 1
 fi

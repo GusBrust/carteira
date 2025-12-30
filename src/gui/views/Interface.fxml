@@ -27,7 +27,7 @@
                <children>
                   <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openDashboard" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@resources/dashboard.png" />
+                        <Image url="/gui/views/resources/dashboard.png" />
                      </image></ImageView>
                   <Label alignment="CENTER" onMouseClicked="#openDashboard" prefHeight="34.0" prefWidth="130.0" text="Dashboard">
                      <font>
@@ -40,7 +40,7 @@
                <children>
                   <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openTransacoes" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@resources/transacoes.png" />
+                        <Image url="/gui/views/resources/transacoes.png" />
                      </image></ImageView>
                   <Label alignment="CENTER" onMouseClicked="#openTransacoes" prefHeight="43.0" prefWidth="130.0" text="Transações">
                      <font>
@@ -56,7 +56,7 @@
                <children>
                   <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openAdicionar" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@resources/adicionar.png" />
+                        <Image url="/gui/views/resources/adicionar.png" />
                      </image></ImageView>
                   <Label alignment="CENTER" onMouseClicked="#openAdicionar" prefHeight="43.0" prefWidth="130.0" text="Adicionar">
                      <font>
@@ -72,7 +72,7 @@
                <children>
                   <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openOrcamentos" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@resources/orcamentos.png" />
+                        <Image url="/gui/views/resources/orcamentos.png" />
                      </image></ImageView>
                   <Label alignment="CENTER" onMouseClicked="#openOrcamentos" prefHeight="43.0" prefWidth="130.0" text="Orçamentos">
                      <font>
@@ -88,7 +88,7 @@
                <children>
                   <ImageView fitHeight="50.0" fitWidth="50.0" onMouseClicked="#openDividas" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@resources/dividas.png" />
+                        <Image url="/gui/views/resources/dividas.png" />
                      </image></ImageView>
                   <Label alignment="CENTER" onMouseClicked="#openDividas" prefHeight="43.0" prefWidth="130.0" text="Dívidas">
                      <font>

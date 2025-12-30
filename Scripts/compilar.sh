@@ -3,6 +3,11 @@
 # Script para compilar o projeto com JavaFX
 # Ajuste o caminho do JavaFX conforme sua instalação
 
+# Obter o diretório raiz do projeto (um nível acima de Scripts/)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+cd "$PROJECT_ROOT"
+
 echo "=== Compilando Projeto Carteira ==="
 echo ""
 
@@ -72,7 +77,7 @@ echo ""
 echo "📁 Arquivos compilados em: bin/"
 echo ""
 echo "🚀 Para executar a GUI:"
-echo "   ./testGUI.sh"
+echo "   ./Scripts/testGUI.sh"
 echo ""
 echo "   Ou manualmente:"
 echo "   java --module-path ${JAVAFX_PATH} --add-modules javafx.controls,javafx.fxml -cp bin:${JAVAFX_PATH}/* gui.controllers.Main"
