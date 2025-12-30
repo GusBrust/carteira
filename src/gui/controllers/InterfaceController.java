@@ -9,12 +9,26 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.layout.StackPane;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import javafx.application.Platform;
 import model.Database;
 import model.Conta;
 import model.Categoria;
+import model.Transacao;
+import model.Despesa;
+import model.Receita;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class InterfaceController {
@@ -31,6 +45,9 @@ public class InterfaceController {
     
     @FXML
     private PieChart pieChartResumo;
+    
+    @FXML
+    private BarChart<String, Number> barChartMensal;
     
     @FXML
     public void initialize() {
@@ -55,8 +72,9 @@ public class InterfaceController {
         String saldoFormatado = String.format("%.2f", saldoTotal).replace(".", ",");
         lblSaldo.setText(saldoFormatado + "€");
         
-        // Atualizar gráfico com categorias
+        // Atualizar gráficos
         atualizarGrafico();
+        atualizarGraficoBarras();
     }
     
     @FXML
@@ -112,6 +130,118 @@ public class InterfaceController {
             PieChart.Data semDados = new PieChart.Data("Sem despesas", 1);
             pieChartResumo.getData().add(semDados);
         }
+    }
+    
+    private void atualizarGraficoBarras() {
+        // Limpar dados anteriores
+        barChartMensal.getData().clear();
+        
+        // Agrupar transações por mês
+        Map<String, Double> despesasPorMes = new HashMap<>();
+        Map<String, Double> receitasPorMes = new HashMap<>();
+        
+        DateTimeFormatter mesFormatter = DateTimeFormatter.ofPattern("MM/yyyy");
+        
+        for (Transacao transacao : db.getTransacoes()) {
+            LocalDateTime data = transacao.getData();
+            String mesAno = data.format(mesFormatter);
+            
+            if (transacao instanceof Despesa) {
+                despesasPorMes.put(mesAno, despesasPorMes.getOrDefault(mesAno, 0.0) + transacao.getValor());
+            } else if (transacao instanceof Receita) {
+                receitasPorMes.put(mesAno, receitasPorMes.getOrDefault(mesAno, 0.0) + transacao.getValor());
+            }
+        }
+        
+        // Calcular totais
+        double totalDespesas = 0.0;
+        for (Double valor : despesasPorMes.values()) {
+            totalDespesas += valor;
+        }
+        double totalReceitas = 0.0;
+        for (Double valor : receitasPorMes.values()) {
+            totalReceitas += valor;
+        }
+        
+        // Criar séries de dados com totais na legenda
+        XYChart.Series<String, Number> serieDespesas = new XYChart.Series<>();
+        serieDespesas.setName(String.format("Despesas").replace(".", ","));
+        
+        XYChart.Series<String, Number> serieReceitas = new XYChart.Series<>();
+        serieReceitas.setName(String.format("Receitas").replace(".", ","));
+        
+        // Coletar todos os meses únicos
+        Map<String, Boolean> todosMeses = new HashMap<>();
+        for (String mes : despesasPorMes.keySet()) {
+            todosMeses.put(mes, true);
+        }
+        for (String mes : receitasPorMes.keySet()) {
+            todosMeses.put(mes, true);
+        }
+        
+        // Adicionar dados para cada mês (garantindo que ambos tenham valores)
+        for (String mes : todosMeses.keySet()) {
+            double despesas = despesasPorMes.getOrDefault(mes, 0.0);
+            double receitas = receitasPorMes.getOrDefault(mes, 0.0);
+            
+            XYChart.Data<String, Number> dataDespesas = new XYChart.Data<>(mes, despesas);
+            XYChart.Data<String, Number> dataReceitas = new XYChart.Data<>(mes, receitas);
+            
+            // Adicionar labels com valores dentro das barras
+            if (despesas > 0) {
+                javafx.scene.control.Label labelDespesas = new javafx.scene.control.Label(String.format("%.2f€", despesas).replace(".", ","));
+                labelDespesas.setStyle("-fx-font-size: 14px; -fx-text-fill: black; -fx-font-weight: bold;");
+                StackPane stackDespesas = new StackPane();
+                stackDespesas.getChildren().add(labelDespesas);
+                dataDespesas.setNode(stackDespesas);
+            }
+            
+            if (receitas > 0) {
+                javafx.scene.control.Label labelReceitas = new javafx.scene.control.Label(String.format("%.2f€", receitas).replace(".", ","));
+                labelReceitas.setStyle("-fx-font-size: 14px; -fx-text-fill: black; -fx-font-weight: bold;");
+                StackPane stackReceitas = new StackPane();
+                stackReceitas.getChildren().add(labelReceitas);
+                dataReceitas.setNode(stackReceitas);
+            }
+            
+            serieDespesas.getData().add(dataDespesas);
+            serieReceitas.getData().add(dataReceitas);
+        }
+        
+        // Adicionar séries ao gráfico
+        if (!serieDespesas.getData().isEmpty() || !serieReceitas.getData().isEmpty()) {
+            barChartMensal.getData().add(serieDespesas);
+            barChartMensal.getData().add(serieReceitas);
+        }
+        
+        // Esconder completamente os eixos e suas marcas
+        CategoryAxis xAxis = (CategoryAxis) barChartMensal.getXAxis();
+        NumberAxis yAxis = (NumberAxis) barChartMensal.getYAxis();
+        
+        xAxis.setVisible(false);
+        xAxis.setTickLabelsVisible(false);
+        xAxis.setTickMarkVisible(false);
+        
+        yAxis.setVisible(false);
+        yAxis.setTickLabelsVisible(false);
+        yAxis.setTickMarkVisible(false);
+        
+        // Configurar para não mostrar eixos e desabilitar animação
+        barChartMensal.setAnimated(false);
+        barChartMensal.setLegendVisible(true);
+        
+        // Configurar estilo inline apenas para propriedades simples
+        barChartMensal.setStyle("-fx-background-color: transparent;");
+        
+        // Aplicar cores das barras programaticamente após o gráfico ser renderizado
+        Platform.runLater(() -> {
+            barChartMensal.lookupAll(".default-color0.chart-bar").forEach(node -> 
+                node.setStyle("-fx-bar-fill: #f44336;")
+            );
+            barChartMensal.lookupAll(".default-color1.chart-bar").forEach(node -> 
+                node.setStyle("-fx-bar-fill: #4CAF50;")
+            );
+        });
     }
     
     /**

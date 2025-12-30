@@ -36,6 +36,10 @@ public class adicionarController {
     @FXML
     private DatePicker dpData;
     @FXML
+    private TextField txtHora;
+    @FXML
+    private TextField txtMinuto;
+    @FXML
     private Button btnAdicionarTransacao;
 
 
@@ -70,6 +74,11 @@ public class adicionarController {
         
         // Define a data padrão como hoje
         dpData.setValue(LocalDate.now());
+        
+        // Define a hora padrão como agora
+        LocalDateTime agora = LocalDateTime.now();
+        txtHora.setText(String.format("%02d", agora.getHour()));
+        txtMinuto.setText(String.format("%02d", agora.getMinute()));
 
         
         // Listener para mostrar/ocultar campos baseado no 
@@ -123,12 +132,43 @@ public class adicionarController {
                 descricao = "Sem descrição";
             }
 
-            // Obtém a data
+            // Obtém a data e hora
             LocalDate dataLocalDate = dpData.getValue();
             if (dataLocalDate == null) {
                 dataLocalDate = LocalDate.now();
             }
-            LocalDateTime data = dataLocalDate.atStartOfDay();
+            
+            // Obtém a hora e minuto
+            int hora, minuto;
+            try {
+                String horaStr = txtHora.getText().trim();
+                String minutoStr = txtMinuto.getText().trim();
+                
+                if (horaStr.isEmpty()) {
+                    hora = LocalDateTime.now().getHour();
+                } else {
+                    hora = Integer.parseInt(horaStr);
+                    if (hora < 0 || hora > 23) {
+                        mostrarErro("A hora deve estar entre 0 e 23.");
+                        return;
+                    }
+                }
+                
+                if (minutoStr.isEmpty()) {
+                    minuto = LocalDateTime.now().getMinute();
+                } else {
+                    minuto = Integer.parseInt(minutoStr);
+                    if (minuto < 0 || minuto > 59) {
+                        mostrarErro("Os minutos devem estar entre 0 e 59.");
+                        return;
+                    }
+                }
+            } catch (NumberFormatException e) {
+                mostrarErro("Hora ou minuto inválidos. Use números (ex: 14:30).");
+                return;
+            }
+            
+            LocalDateTime data = dataLocalDate.atTime(hora, minuto);
 
             // Obtém a conta
             Conta conta = db.getConta();
@@ -201,6 +241,9 @@ public class adicionarController {
         cbCategoria.getSelectionModel().clearSelection();
         cbDividaTransacao.getSelectionModel().select("Nenhuma");
         dpData.setValue(LocalDate.now());
+        LocalDateTime agora = LocalDateTime.now();
+        txtHora.setText(String.format("%02d", agora.getHour()));
+        txtMinuto.setText(String.format("%02d", agora.getMinute()));
     }
 
     private void atualizarListaDividas() {
