@@ -175,6 +175,16 @@
                      </HBox>
                      <HBox alignment="CENTER_LEFT" spacing="10.0">
                         <children>
+                           <Label alignment="CENTER_RIGHT" minWidth="120.0" prefWidth="120.0" text="Despesa Fixa:">
+                              <font>
+                                 <Font name="Segoe UI" size="16.0" />   
+                              </font>
+                           </Label>
+                           <CheckBox fx:id="chkDespesaFixa" />
+                        </children>
+                     </HBox>
+                     <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <children>
                            <Label alignment="CENTER_RIGHT" minWidth="120.0" prefWidth="120.0" text="Dívida (opcional):">
                               <font>
                                  <Font name="Segoe UI" size="16.0" />

@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
@@ -34,6 +35,8 @@ public class adicionarController {
     @FXML
     private ChoiceBox<String> cbDividaTransacao;
     @FXML
+    private CheckBox chkDespesaFixa;
+    @FXML
     private DatePicker dpData;
     @FXML
     private TextField txtHora;
@@ -57,7 +60,7 @@ public class adicionarController {
 
     private void inicializarCamposTransacao() {
         // Popula o ChoiceBox de tipo de transação
-        cbTipo.getItems().addAll("Receita", "Despesa", "Transferência");
+        cbTipo.getItems().addAll("Receita", "Despesa");
         
         // Popula o ChoiceBox de categorias
         for (Categoria categoria : db.getCategorias()) {
@@ -81,18 +84,16 @@ public class adicionarController {
         txtMinuto.setText(String.format("%02d", agora.getMinute()));
 
         
-        // Listener para mostrar/ocultar campos baseado no 
+        // Listener para mostrar/ocultar campos baseado no tipo de transação
         cbTipo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if ("Transferência".equals(newVal)) {
-                cbCategoria.setDisable(true);
-                cbDividaTransacao.setDisable(true);
+            cbCategoria.setDisable(false);
+            if ("Despesa".equals(newVal)) {
+                cbDividaTransacao.setDisable(false);
+                chkDespesaFixa.setDisable(false);
             } else {
-                cbCategoria.setDisable(false);
-                if ("Despesa".equals(newVal)) {
-                    cbDividaTransacao.setDisable(false);
-                } else {
-                    cbDividaTransacao.setDisable(true);
-                }
+                cbDividaTransacao.setDisable(true);
+                chkDespesaFixa.setDisable(true);
+                chkDespesaFixa.setSelected(false);
             }
         });
     }
@@ -181,17 +182,16 @@ public class adicionarController {
             Transacao transacao = null;
             Categoria categoria = null;
 
-            if (!"Transferência".equals(tipo)) {
-                String categoriaNome = cbCategoria.getSelectionModel().getSelectedItem();
-                if (categoriaNome == null || categoriaNome.isEmpty()) {
-                    mostrarErro("Selecione uma categoria.");
-                    return;
-                }
-                categoria = db.buscarCategoriaPorNome(categoriaNome);
-                if (categoria == null) {
-                    mostrarErro("Categoria não encontrada.");
-                    return;
-                }
+            // Obtém a categoria
+            String categoriaNome = cbCategoria.getSelectionModel().getSelectedItem();
+            if (categoriaNome == null || categoriaNome.isEmpty()) {
+                mostrarErro("Selecione uma categoria.");
+                return;
+            }
+            categoria = db.buscarCategoriaPorNome(categoriaNome);
+            if (categoria == null) {
+                mostrarErro("Categoria não encontrada.");
+                return;
             }
 
             if ("Receita".equals(tipo)) {
@@ -202,16 +202,13 @@ public class adicionarController {
                 if (dividaNome != null && !dividaNome.isEmpty() && !"Nenhuma".equals(dividaNome)) {
                     dividaId = db.getIdDividaPorNome(dividaNome);
                 }
+                boolean isDespesaFixa = chkDespesaFixa.isSelected();
+                
                 if (dividaId != null && !dividaId.isEmpty()) {
-                    transacao = new Despesa(valor, descricao, data, categoria, conta, dividaId);
+                    transacao = new Despesa(valor, descricao, data, categoria, conta, dividaId, isDespesaFixa);
                 } else {
-                    transacao = new Despesa(valor, descricao, data, categoria, conta);
+                    transacao = new Despesa(valor, descricao, data, categoria, conta, isDespesaFixa);
                 }
-            } else if ("Transferência".equals(tipo)) {
-                // Para transferência, precisamos de uma conta de destino
-                // Como temos apenas uma conta, não podemos fazer transferência
-                mostrarErro("Transferências não estão disponíveis com apenas uma conta.");
-                return;
             }
 
             if (transacao == null) {
@@ -224,7 +221,7 @@ public class adicionarController {
                 mostrarSucesso("Transação adicionada com sucesso!");
                 limparCamposTransacao();
             } else {
-                mostrarErro("Erro ao processar a transação. Verifique se há saldo suficiente.");
+                mostrarErro("Erro ao processar a transação.");
             }
 
         } catch (Exception e) {
@@ -240,6 +237,7 @@ public class adicionarController {
         txtDescricao.clear();
         cbCategoria.getSelectionModel().clearSelection();
         cbDividaTransacao.getSelectionModel().select("Nenhuma");
+        chkDespesaFixa.setSelected(false);
         dpData.setValue(LocalDate.now());
         LocalDateTime agora = LocalDateTime.now();
         txtHora.setText(String.format("%02d", agora.getHour()));

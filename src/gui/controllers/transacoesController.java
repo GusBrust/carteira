@@ -93,9 +93,15 @@ public class transacoesController {
             }
         });
 
-        // Coluna Despesa Fixa - por enquanto sempre "Não" (pode ser implementado depois)
+        // Coluna Despesa Fixa - mostra "Sim" ou "Não" baseado na informação da despesa
         colDespesaFixa.setCellValueFactory(param -> {
-            return new javafx.beans.property.SimpleStringProperty("Não");
+            Transacao transacao = param.getValue();
+            if (transacao instanceof Despesa) {
+                Despesa despesa = (Despesa) transacao;
+                return new javafx.beans.property.SimpleStringProperty(despesa.isDespesaFixa() ? "Sim" : "Não");
+            } else {
+                return new javafx.beans.property.SimpleStringProperty("Não");
+            }
         });
     }
 

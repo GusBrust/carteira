@@ -161,6 +161,7 @@ public class Database implements Serializable {
   public void removerTransacao(Transacao transacao) {
     if (this.transacoes.contains(transacao)) {
       this.transacoes.remove(transacao);
+      this.conta.depositar(transacao.getValor());
       salvar("transacoes");
       salvar("contas");
     }

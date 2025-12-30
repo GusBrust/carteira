@@ -51,9 +51,7 @@ public class Conta implements Serializable {
         if (valor <= 0) {
             throw new IllegalArgumentException("O valor a retirar deve ser maior que zero.");
         }
-        if (this.saldo < valor) {
-            throw new IllegalArgumentException("Saldo insuficiente para retirar o valor.");
-        }
+        // Permite saldo negativo
         this.saldo -= valor;
     }
 

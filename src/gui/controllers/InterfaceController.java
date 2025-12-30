@@ -27,8 +27,6 @@ import model.Receita;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class InterfaceController {
@@ -54,6 +52,7 @@ public class InterfaceController {
         // Carregar Database
         db = Database.carregar();
         atualizarInterface();
+        
     }
     
     private void atualizarInterface() {
@@ -136,80 +135,64 @@ public class InterfaceController {
         // Limpar dados anteriores
         barChartMensal.getData().clear();
         
-        // Agrupar transações por mês
-        Map<String, Double> despesasPorMes = new HashMap<>();
-        Map<String, Double> receitasPorMes = new HashMap<>();
+        // Obter o mês e ano atual
+        LocalDateTime agora = LocalDateTime.now();
+        int mesAtual = agora.getMonthValue();
+        int anoAtual = agora.getYear();
         
-        DateTimeFormatter mesFormatter = DateTimeFormatter.ofPattern("MM/yyyy");
+        // Calcular totais do mês atual
+        double totalDespesas = 0.0;
+        double totalReceitas = 0.0;
         
         for (Transacao transacao : db.getTransacoes()) {
             LocalDateTime data = transacao.getData();
-            String mesAno = data.format(mesFormatter);
-            
-            if (transacao instanceof Despesa) {
-                despesasPorMes.put(mesAno, despesasPorMes.getOrDefault(mesAno, 0.0) + transacao.getValor());
-            } else if (transacao instanceof Receita) {
-                receitasPorMes.put(mesAno, receitasPorMes.getOrDefault(mesAno, 0.0) + transacao.getValor());
+            // Verificar se a transação é do mês atual
+            if (data.getMonthValue() == mesAtual && data.getYear() == anoAtual) {
+                if (transacao instanceof Despesa) {
+                    totalDespesas += transacao.getValor();
+                } else if (transacao instanceof Receita) {
+                    totalReceitas += transacao.getValor();
+                }
             }
-        }
-        
-        // Calcular totais
-        double totalDespesas = 0.0;
-        for (Double valor : despesasPorMes.values()) {
-            totalDespesas += valor;
-        }
-        double totalReceitas = 0.0;
-        for (Double valor : receitasPorMes.values()) {
-            totalReceitas += valor;
         }
         
         // Criar séries de dados com totais na legenda
         XYChart.Series<String, Number> serieDespesas = new XYChart.Series<>();
-        serieDespesas.setName(String.format("Despesas").replace(".", ","));
+        serieDespesas.setName(String.format("Despesas: %.2f€", totalDespesas).replace(".", ","));
         
         XYChart.Series<String, Number> serieReceitas = new XYChart.Series<>();
-        serieReceitas.setName(String.format("Receitas").replace(".", ","));
+        serieReceitas.setName(String.format("Receitas: %.2f€", totalReceitas).replace(".", ","));
         
-        // Coletar todos os meses únicos
-        Map<String, Boolean> todosMeses = new HashMap<>();
-        for (String mes : despesasPorMes.keySet()) {
-            todosMeses.put(mes, true);
-        }
-        for (String mes : receitasPorMes.keySet()) {
-            todosMeses.put(mes, true);
+        // Formatar o nome do mês atual
+        DateTimeFormatter mesFormatter = DateTimeFormatter.ofPattern("MM/yyyy");
+        String mesAtualStr = agora.format(mesFormatter);
+        
+        // Criar dados para o mês atual
+        XYChart.Data<String, Number> dataDespesas = new XYChart.Data<>(mesAtualStr, totalDespesas);
+        XYChart.Data<String, Number> dataReceitas = new XYChart.Data<>(mesAtualStr, totalReceitas);
+        
+        // Adicionar labels com valores dentro das barras
+        if (totalDespesas > 0) {
+            javafx.scene.control.Label labelDespesas = new javafx.scene.control.Label(String.format("%.2f€", totalDespesas).replace(".", ","));
+            labelDespesas.setStyle("-fx-font-size: 14px; -fx-text-fill: black; -fx-font-weight: bold;");
+            StackPane stackDespesas = new StackPane();
+            stackDespesas.getChildren().add(labelDespesas);
+            dataDespesas.setNode(stackDespesas);
         }
         
-        // Adicionar dados para cada mês (garantindo que ambos tenham valores)
-        for (String mes : todosMeses.keySet()) {
-            double despesas = despesasPorMes.getOrDefault(mes, 0.0);
-            double receitas = receitasPorMes.getOrDefault(mes, 0.0);
-            
-            XYChart.Data<String, Number> dataDespesas = new XYChart.Data<>(mes, despesas);
-            XYChart.Data<String, Number> dataReceitas = new XYChart.Data<>(mes, receitas);
-            
-            // Adicionar labels com valores dentro das barras
-            if (despesas > 0) {
-                javafx.scene.control.Label labelDespesas = new javafx.scene.control.Label(String.format("%.2f€", despesas).replace(".", ","));
-                labelDespesas.setStyle("-fx-font-size: 14px; -fx-text-fill: black; -fx-font-weight: bold;");
-                StackPane stackDespesas = new StackPane();
-                stackDespesas.getChildren().add(labelDespesas);
-                dataDespesas.setNode(stackDespesas);
-            }
-            
-            if (receitas > 0) {
-                javafx.scene.control.Label labelReceitas = new javafx.scene.control.Label(String.format("%.2f€", receitas).replace(".", ","));
-                labelReceitas.setStyle("-fx-font-size: 14px; -fx-text-fill: black; -fx-font-weight: bold;");
-                StackPane stackReceitas = new StackPane();
-                stackReceitas.getChildren().add(labelReceitas);
-                dataReceitas.setNode(stackReceitas);
-            }
-            
-            serieDespesas.getData().add(dataDespesas);
-            serieReceitas.getData().add(dataReceitas);
+        if (totalReceitas > 0) {
+            javafx.scene.control.Label labelReceitas = new javafx.scene.control.Label(String.format("%.2f€", totalReceitas).replace(".", ","));
+            labelReceitas.setStyle("-fx-font-size: 14px; -fx-text-fill: black; -fx-font-weight: bold;");
+            StackPane stackReceitas = new StackPane();
+            stackReceitas.getChildren().add(labelReceitas);
+            dataReceitas.setNode(stackReceitas);
         }
+        
+        serieDespesas.getData().add(dataDespesas);
+        serieReceitas.getData().add(dataReceitas);
         
         // Adicionar séries ao gráfico
-        if (!serieDespesas.getData().isEmpty() || !serieReceitas.getData().isEmpty()) {
+        if (totalDespesas > 0 || totalReceitas > 0) {
             barChartMensal.getData().add(serieDespesas);
             barChartMensal.getData().add(serieReceitas);
         }
