@@ -67,7 +67,8 @@ public class transacoesController {
             return new javafx.beans.property.SimpleStringProperty("N/A");
         });
 
-        // Coluna Categoria - mostra o nome da categoria ou "N/A"
+
+        // Coluna Categoria - mostra o nome da categoria ou "N/A", filtrar por categoria
         colCategoria.setCellValueFactory(param -> {
             Transacao transacao = param.getValue();
             if (transacao.getCategoria() != null) {
@@ -119,11 +120,17 @@ public class transacoesController {
 
     private void atualizarTotalDespesas() {
         double totalDespesas = 0;
+        double totalDespesasAlimentacao = 0;
         for (Transacao transacao : db.getTransacoes()) {
+            if (transacao.getCategoria().getNome().equals( "Alimentação")) {
+                totalDespesasAlimentacao += transacao.getValor();
+            }
             if (transacao instanceof Despesa) {
                 totalDespesas += transacao.getValor();
             }
         }
+        System.out.println("Total Despesas Alimentação: " + totalDespesasAlimentacao);
+        System.out.println("Total Despesas: " + totalDespesas);
         String totalFormatado = String.format("%.2f", totalDespesas).replace(".", ",");
         lblTotalDespesas.setText(totalFormatado + "€");
     }

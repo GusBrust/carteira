@@ -148,6 +148,8 @@ public class InterfaceController {
         LocalDateTime agora = LocalDateTime.now();
         int mesAtual = agora.getMonthValue();
         int anoAtual = agora.getYear();
+
+        // LocalDateTime dataInicio = new LocalDateTime()
         
         // Calcular totais do mês atual
         double totalDespesas = 0.0;
